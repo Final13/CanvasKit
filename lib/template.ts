@@ -1,6 +1,10 @@
 export const CANVAS_WIDTH = 1748;
 export const CANVAS_HEIGHT = 2480;
 
+const DIGIT_TOP = 750;
+const DIGIT_SCALE = 0.75;
+const DIGIT_OFFSET = 260;
+
 function loadImage(
   fabric: any,
   src: string,
@@ -19,6 +23,53 @@ function loadImage(
       },
     );
   });
+}
+
+async function loadDigitImage(fabric: any, value: string, name: string, left: number) {
+  const img = await loadImage(fabric, `/assets/number-${value}-gold.png`, {
+    originX: "center",
+    originY: "center",
+    left,
+    top: DIGIT_TOP,
+    scaleX: DIGIT_SCALE,
+    scaleY: DIGIT_SCALE,
+    name,
+  });
+  return img;
+}
+
+export async function updateDigits(
+  canvas: any,
+  fabric: any,
+  tens: string,
+  units: string
+) {
+  const centerX = CANVAS_WIDTH / 2;
+
+  // remove existing digits
+  const existing = canvas
+    .getObjects()
+    .filter((obj: any) => obj.name === "digit-tens" || obj.name === "digit-units");
+  existing.forEach((obj: any) => canvas.remove(obj));
+
+  const digits: any[] = [];
+  if (tens && tens !== "") {
+    digits.push(
+      await loadDigitImage(fabric, tens, "digit-tens", centerX - DIGIT_OFFSET)
+    );
+  }
+  if (units && units !== "") {
+    digits.push(
+      await loadDigitImage(fabric, units, "digit-units", centerX + DIGIT_OFFSET)
+    );
+  }
+
+  if (digits.length) {
+    canvas.add(...digits);
+    // keep digits just above the background (index 0)
+    digits.forEach((img, i) => canvas.moveTo(img, i + 1));
+    canvas.renderAll();
+  }
 }
 
 export async function loadTemplate(canvas: any, fabric: any) {
@@ -43,24 +94,7 @@ export async function loadTemplate(canvas: any, fabric: any) {
   canvas.sendToBack(bg);
 
   // Digits "30"
-  const digitScale = 0.75;
-  const digit3 = await loadImage(fabric, "/assets/number-3-gold.png", {
-    originX: "center",
-    originY: "center",
-    left: centerX - 260,
-    top: 750,
-    scaleX: digitScale,
-    scaleY: digitScale,
-  });
-  const digit0 = await loadImage(fabric, "/assets/number-0-gold.png", {
-    originX: "center",
-    originY: "center",
-    left: centerX + 260,
-    top: 750,
-    scaleX: digitScale,
-    scaleY: digitScale,
-  });
-  canvas.add(digit3, digit0);
+  await updateDigits(canvas, fabric, "3", "0");
 
   // Texts
   const script = "Marck Script, cursive";

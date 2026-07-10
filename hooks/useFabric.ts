@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { getFabric } from "@/lib/fabric";
-import { loadTemplate, CANVAS_WIDTH, CANVAS_HEIGHT } from "@/lib/template";
+import {
+  loadTemplate,
+  updateDigits,
+  CANVAS_WIDTH,
+  CANVAS_HEIGHT,
+} from "@/lib/template";
 import { useHistory } from "./useHistory";
 
 export type FabricCanvas = any;
@@ -20,7 +25,14 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
   const canvasRefState = useRef<FabricCanvas | null>(null);
   const skipHistory = useRef(false);
   const [activeObject, setActiveObject] = useState<any>(null);
-  const { push, undo, redo, reset: resetHistory, canUndo, canRedo } = useHistory<string>(null, 30);
+  const {
+    push,
+    undo,
+    redo,
+    reset: resetHistory,
+    canUndo,
+    canRedo,
+  } = useHistory<string>(null, 30);
 
   const capture = useCallback(() => {
     const canvas = canvasRefState.current;
@@ -244,18 +256,19 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     });
   }, [resetHistory]);
 
-  const saveJSON = useCallback(() => {
-    const canvas = canvasRefState.current;
-    if (!canvas) return;
-    const json = JSON.stringify(canvas.toJSON(), null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    downloadDataUrl(url, "design.json");
-    URL.revokeObjectURL(url);
-    try {
-      localStorage.setItem("canvaskit-design", json);
-    } catch {}
-  }, []);
+  const setDigits = useCallback(
+    async (tens: string, units: string) => {
+      const canvas = canvasRefState.current;
+      const fabric = fabricRef.current;
+      if (!canvas || !fabric) return;
+
+      skipHistory.current = true;
+      await updateDigits(canvas, fabric, tens, units);
+      skipHistory.current = false;
+      capture();
+    },
+    [capture]
+  );
 
   const downloadPNG = useCallback(() => {
     const canvas = canvasRefState.current;
@@ -276,7 +289,7 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     undo: handleUndo,
     redo: handleRedo,
     reset: handleReset,
-    saveJSON,
+    setDigits,
     downloadPNG,
   };
 }

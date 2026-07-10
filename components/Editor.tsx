@@ -3,16 +3,17 @@
 import { useRef, useEffect, useState } from "react";
 import { useFabric } from "@/hooks/useFabric";
 import { Toolbar } from "./Toolbar";
+import { EditorTabs, type TabKey } from "./EditorTabs";
 import { TabPanel } from "./TabPanel";
 import { QrModal } from "./QrModal";
 
 export function Editor() {
   const canvasElRef = useRef<HTMLCanvasElement>(null);
   const [qrOpen, setQrOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabKey>("text");
 
   const {
     ready,
-    activeObject,
     canUndo,
     canRedo,
     addText,
@@ -22,7 +23,7 @@ export function Editor() {
     undo,
     redo,
     reset,
-    saveJSON,
+    setDigits,
     downloadPNG,
   } = useFabric(canvasElRef);
 
@@ -31,7 +32,8 @@ export function Editor() {
       if (e.key === "Delete" || e.key === "Backspace") {
         // avoid deleting while editing text
         const target = e.target as HTMLElement;
-        if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA") return;
+        if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA")
+          return;
         deleteSelected();
       }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
@@ -45,38 +47,40 @@ export function Editor() {
   }, [deleteSelected, undo, redo]);
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center">
-      <Toolbar
-        canUndo={canUndo}
-        canRedo={canRedo}
-        hasSelection={!!activeObject}
-        onUndo={undo}
-        onRedo={redo}
-        onReset={reset}
-        onQR={() => setQrOpen(true)}
-        onSave={saveJSON}
-        onDownload={downloadPNG}
-        onDelete={deleteSelected}
-      />
+    <div className="flex w-full max-w-sm flex-col items-center sm:max-w-md md:max-w-lg">
+      <div className="w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <Toolbar
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={undo}
+          onRedo={redo}
+          onReset={reset}
+          onQR={() => setQrOpen(true)}
+          onDownload={downloadPNG}
+        />
 
-      <div className="relative w-full max-w-[420px] aspect-[148/210] overflow-hidden rounded-none bg-black shadow-2xl">
-        {!ready && (
-          <div className="absolute inset-0 flex items-center justify-center text-sm text-white/70">
-            Загрузка редактора…
-          </div>
-        )}
-        <canvas
-          ref={canvasElRef}
-          className="block h-full w-full"
-          style={{ touchAction: "none" }}
+        <EditorTabs active={activeTab} onChange={setActiveTab} />
+
+        <div className="relative w-full aspect-[148/210] overflow-hidden bg-black">
+          {!ready && (
+            <div className="absolute inset-0 flex items-center justify-center text-sm text-white/70">
+              Загрузка редактора…
+            </div>
+          )}
+          <canvas
+            ref={canvasElRef}
+            className="block h-full w-full"
+            style={{ touchAction: "none" }}
+          />
+        </div>
+
+        <TabPanel
+          activeTab={activeTab}
+          onAddText={addText}
+          onAddPhoto={addImageFromFile}
+          onDigitsChange={setDigits}
         />
       </div>
-
-      <TabPanel
-        onAddText={addText}
-        onAddPhoto={addImageFromFile}
-        onSave={saveJSON}
-      />
 
       <QrModal
         open={qrOpen}
