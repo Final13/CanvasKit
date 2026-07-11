@@ -64,6 +64,20 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       const fabric = await getFabric();
       if (disposed) return;
 
+      // Make resize/rotate controls larger and visible on dark backgrounds
+      fabric.Object.prototype.set({
+        cornerSize: 24,
+        touchCornerSize: 36,
+        cornerColor: "#ffffff",
+        cornerStrokeColor: "#000000",
+        cornerStyle: "circle",
+        transparentCorners: false,
+        borderColor: "#ffffff",
+        borderScaleFactor: 2,
+        rotatingPointOffset: 50,
+        hasRotatingPoint: true,
+      });
+
       const canvas = new fabric.Canvas(canvasEl, {
         width: CANVAS_WIDTH,
         height: CANVAS_HEIGHT,
