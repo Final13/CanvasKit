@@ -64,19 +64,42 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       const fabric = await getFabric();
       if (disposed) return;
 
-      // Make resize/rotate controls larger and visible on dark backgrounds
+      // Large, phone-friendly controls with clear gap between resize and rotate
       fabric.Object.prototype.set({
-        cornerSize: 24,
-        touchCornerSize: 36,
+        cornerSize: 54,
+        touchCornerSize: 80,
         cornerColor: "#ffffff",
         cornerStrokeColor: "#000000",
         cornerStyle: "circle",
         transparentCorners: false,
         borderColor: "#ffffff",
-        borderScaleFactor: 2,
-        rotatingPointOffset: 50,
-        hasRotatingPoint: true,
+        borderScaleFactor: 3,
       });
+      // rotatingPointOffset is ignored in Fabric 5; set the rotate control offset directly
+      fabric.Object.prototype.controls.mtr.offsetY = -100;
+
+      // Patch Fabric's incorrect textBaseline value ('alphabetical' is not valid)
+      fabric.Text.prototype._setTextStyles = function (
+        ctx: CanvasRenderingContext2D,
+        charStyle: any,
+        forMeasuring: boolean
+      ) {
+        ctx.textBaseline = "alphabetic";
+        if (this.path) {
+          switch (this.pathAlign) {
+            case "center":
+              ctx.textBaseline = "middle";
+              break;
+            case "ascender":
+              ctx.textBaseline = "top";
+              break;
+            case "descender":
+              ctx.textBaseline = "bottom";
+              break;
+          }
+        }
+        ctx.font = this._getFontDeclaration(charStyle, forMeasuring);
+      };
 
       const canvas = new fabric.Canvas(canvasEl, {
         width: CANVAS_WIDTH,
