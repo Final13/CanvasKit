@@ -52,6 +52,7 @@ export function useFabric(
   const canvasRefState = useRef<FabricCanvas | null>(null);
   const skipHistory = useRef(false);
   const [activeObject, setActiveObject] = useState<any>(null);
+  const [activeObjectTick, setActiveObjectTick] = useState(0);
   const {
     push,
     undo,
@@ -369,6 +370,9 @@ export function useFabric(
         active.set(props);
         canvas.renderAll();
       });
+
+      setActiveObject(active);
+      setActiveObjectTick((t) => t + 1);
     },
     [withoutHistory]
   );
@@ -420,6 +424,7 @@ export function useFabric(
   return {
     ready,
     activeObject,
+    activeObjectTick,
     canUndo,
     canRedo,
     addText,

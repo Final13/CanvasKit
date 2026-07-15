@@ -42,13 +42,13 @@ export function TabPanel({
     activeObject &&
     (activeObject.type === "i-text" || activeObject.type === "text");
 
-  const fontFamilies = useMemo(
-    () => ["Montserrat", ...new Set(fonts.filter((f) => f.family).map((f) => f.family))],
-    [fonts]
-  );
+  const fontFamilies = useMemo(() => {
+    const projectFonts = ["Montserrat", "Marck Script"];
+    const templateFonts = fonts.filter((f) => f.family).map((f) => f.family);
+    return [...new Set([...projectFonts, ...templateFonts])];
+  }, [fonts]);
 
   const currentFont = activeObject?.fontFamily || "Montserrat";
-  const currentSize = activeObject?.fontSize || 80;
   const currentColor =
     typeof activeObject?.fill === "string" ? activeObject.fill : "#000000";
   const currentWeight = activeObject?.fontWeight || "normal";
@@ -102,84 +102,58 @@ export function TabPanel({
           </button>
 
           {isText ? (
-            <div className="flex flex-col gap-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-zinc-500">Шрифт</label>
-                  <select
-                    value={currentFont}
-                    onChange={(e) => handleFontChange(e.target.value)}
-                    className="w-full cursor-pointer rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
-                  >
-                    {fontFamilies.map((family) => (
-                      <option key={family} value={family}>
-                        {family}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={currentFont}
+                onChange={(e) => handleFontChange(e.target.value)}
+                title="Шрифт"
+                className="min-w-0 flex-1 cursor-pointer rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-black"
+              >
+                {fontFamilies.map((family) => (
+                  <option key={family} value={family}>
+                    {family}
+                  </option>
+                ))}
+              </select>
 
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-zinc-500">Размер</label>
-                  <input
-                    type="number"
-                    min={1}
-                    value={Math.round(currentSize)}
-                    onChange={(e) =>
-                      updateActiveObject({ fontSize: Number(e.target.value) })
-                    }
-                    className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-black"
-                  />
-                </div>
-              </div>
+              <input
+                type="color"
+                value={currentColor}
+                onChange={(e) => updateActiveObject({ fill: e.target.value })}
+                title="Цвет"
+                className="h-10 w-10 shrink-0 cursor-pointer rounded-xl border border-zinc-300 p-1"
+              />
 
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-zinc-500">Цвет</label>
-                  <input
-                    type="color"
-                    value={currentColor}
-                    onChange={(e) =>
-                      updateActiveObject({ fill: e.target.value })
-                    }
-                    className="h-9 w-16 cursor-pointer rounded border border-zinc-300 p-0.5"
-                  />
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() =>
-                      updateActiveObject({
-                        fontWeight: currentWeight === "bold" ? "normal" : "bold",
-                      })
-                    }
-                    className={`rounded-lg p-2 transition cursor-pointer ${
-                      currentWeight === "bold"
-                        ? "bg-black text-white"
-                        : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-                    }`}
-                    title="Жирный"
-                  >
-                    <Bold size={18} />
-                  </button>
-                  <button
-                    onClick={() =>
-                      updateActiveObject({
-                        fontStyle: currentStyle === "italic" ? "normal" : "italic",
-                      })
-                    }
-                    className={`rounded-lg p-2 transition cursor-pointer ${
-                      currentStyle === "italic"
-                        ? "bg-black text-white"
-                        : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
-                    }`}
-                    title="Курсив"
-                  >
-                    <Italic size={18} />
-                  </button>
-                </div>
-              </div>
-
+              <button
+                onClick={() =>
+                  updateActiveObject({
+                    fontWeight: currentWeight === "bold" ? "normal" : "bold",
+                  })
+                }
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition cursor-pointer ${
+                  currentWeight === "bold"
+                    ? "bg-black text-white"
+                    : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+                }`}
+                title="Жирный"
+              >
+                <Bold size={18} />
+              </button>
+              <button
+                onClick={() =>
+                  updateActiveObject({
+                    fontStyle: currentStyle === "italic" ? "normal" : "italic",
+                  })
+                }
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition cursor-pointer ${
+                  currentStyle === "italic"
+                    ? "bg-black text-white"
+                    : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+                }`}
+                title="Курсив"
+              >
+                <Italic size={18} />
+              </button>
             </div>
           ) : (
             <p className="text-sm text-zinc-500">
