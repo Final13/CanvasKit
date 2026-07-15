@@ -16,7 +16,15 @@ const marckScript = Marck_Script({
 
 export const metadata: Metadata = {
   title: "Конструктор приглашений",
-  description: "Редактор приглашений на Fabric.js",
+  description: "Редактор приглашений на праздники, мероприятия и торжества",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 };
 
 export default function RootLayout({
