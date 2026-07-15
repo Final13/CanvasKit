@@ -6,8 +6,13 @@ import { Toolbar } from "./Toolbar";
 import { EditorTabs, type TabKey } from "./EditorTabs";
 import { TabPanel } from "./TabPanel";
 import { QrModal } from "./QrModal";
+import type { TemplateData } from "@/lib/templates";
 
-export function Editor() {
+interface EditorProps {
+  template: TemplateData;
+}
+
+export function Editor({ template }: EditorProps) {
   const canvasElRef = useRef<HTMLCanvasElement>(null);
   const [qrOpen, setQrOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>("text");
@@ -23,14 +28,12 @@ export function Editor() {
     undo,
     redo,
     reset,
-    setDigits,
     downloadPNG,
-  } = useFabric(canvasElRef);
+  } = useFabric(canvasElRef, template);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Delete" || e.key === "Backspace") {
-        // avoid deleting while editing text
         const target = e.target as HTMLElement;
         if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA")
           return;
@@ -78,7 +81,7 @@ export function Editor() {
           activeTab={activeTab}
           onAddText={addText}
           onAddPhoto={addImageFromFile}
-          onDigitsChange={setDigits}
+          onDigitsChange={() => {}}
         />
       </div>
 

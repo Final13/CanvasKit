@@ -52,7 +52,7 @@ export function TabPanel({
             />
             <button
               onClick={applyDigits}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-black py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+              className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-black py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
             >
               Применить
             </button>
@@ -68,7 +68,7 @@ export function TabPanel({
           </p>
           <button
             onClick={() => onAddText()}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
           >
             <Type size={18} />
             Добавить текст
@@ -90,7 +90,7 @@ export function TabPanel({
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
           >
             <ImagePlus size={18} />
             Загрузить фото

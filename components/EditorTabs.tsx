@@ -24,7 +24,7 @@ export function EditorTabs({ active, onChange }: EditorTabsProps) {
           <button
             key={key}
             onClick={() => onChange(key)}
-            className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-medium transition sm:py-4 ${
+            className={`flex flex-1 cursor-pointer items-center justify-center gap-2 py-3 text-sm font-medium transition sm:py-4 ${
               isActive
                 ? "bg-white text-black"
                 : "bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"

@@ -22,7 +22,7 @@ export function Toolbar({
   onDownload,
 }: ToolbarProps) {
   const btn =
-    "flex h-10 w-10 items-center justify-center rounded-xl text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-30 sm:h-11 sm:w-11";
+    "flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-30 sm:h-11 sm:w-11";
 
   return (
     <div className="flex w-full items-center justify-center gap-1 bg-black px-4 py-3 sm:gap-2">

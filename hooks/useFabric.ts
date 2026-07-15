@@ -1,12 +1,7 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { getFabric } from "@/lib/fabric";
-import {
-  loadTemplate,
-  updateDigits,
-  CANVAS_WIDTH,
-  CANVAS_HEIGHT,
-} from "@/lib/template";
 import { useHistory } from "./useHistory";
+import type { TemplateData } from "@/lib/templates";
 
 export type FabricCanvas = any;
 
@@ -19,7 +14,39 @@ function downloadDataUrl(dataUrl: string, filename: string) {
   document.body.removeChild(link);
 }
 
-export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
+function injectFonts(fonts: { family: string; url?: string }[]) {
+  if (typeof document === "undefined") return;
+  const styleId = "template-fonts";
+  let style = document.getElementById(styleId) as HTMLStyleElement | null;
+  if (!style) {
+    style = document.createElement("style");
+    style.id = styleId;
+    document.head.appendChild(style);
+  }
+  const css = fonts
+    .filter((f) => f.url)
+    .map(
+      (f) =>
+        `@font-face { font-family: "${f.family}"; src: url("${encodeURI(f.url!)}"); font-display: swap; }`
+    )
+    .join("\n");
+  style.textContent = css;
+}
+
+async function loadFonts(fonts: { family: string; url?: string }[]) {
+  const families = fonts.filter((f) => f.url).map((f) => `${f.family}`);
+  if (!families.length || typeof document === "undefined") return;
+  try {
+    await Promise.all(families.map((family) => document.fonts.load(`12px "${family}"`)));
+  } catch {
+    // ignore font loading errors, fallback will be used
+  }
+}
+
+export function useFabric(
+  canvasRef: React.RefObject<HTMLCanvasElement | null>,
+  template: TemplateData | null
+) {
   const [ready, setReady] = useState(false);
   const fabricRef = useRef<any>(null);
   const canvasRefState = useRef<FabricCanvas | null>(null);
@@ -54,17 +81,45 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     [capture]
   );
 
+  const loadTemplateIntoCanvas = useCallback(
+    async (canvas: any, fabric: any, tpl: TemplateData) => {
+      if (!canvas || !fabric || !tpl) return;
+
+      injectFonts(tpl.fonts || []);
+      await loadFonts(tpl.fonts || []);
+
+      canvas.setWidth(tpl.canvas.width);
+      canvas.setHeight(tpl.canvas.height);
+      canvas.backgroundColor = tpl.canvas.background || "#ffffff";
+
+      skipHistory.current = true;
+      canvas.loadFromJSON(
+        {
+          version: "5.3.0",
+          objects: tpl.objects,
+          background: tpl.canvas.background || "",
+        },
+        () => {
+          canvas.renderAll();
+          resetHistory(JSON.stringify(canvas.toJSON()));
+          skipHistory.current = false;
+          setReady(true);
+        }
+      );
+    },
+    [resetHistory]
+  );
+
   useEffect(() => {
     let disposed = false;
     const canvasEl = canvasRef.current;
-    if (!canvasEl) return;
+    if (!canvasEl || !template) return;
 
     (async () => {
       await document.fonts.ready;
       const fabric = await getFabric();
       if (disposed) return;
 
-      // Large, phone-friendly controls with clear gap between resize and rotate
       fabric.Object.prototype.set({
         cornerSize: 54,
         touchCornerSize: 80,
@@ -75,10 +130,59 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         borderColor: "#ffffff",
         borderScaleFactor: 3,
       });
-      // rotatingPointOffset is ignored in Fabric 5; set the rotate control offset directly
       fabric.Object.prototype.controls.mtr.offsetY = -100;
 
-      // Patch Fabric's incorrect textBaseline value ('alphabetical' is not valid)
+      // Увеличиваем толщину обводки угловых контролов (resize, rotate)
+      fabric.controlsUtils.renderCircleControl = function (
+        ctx: CanvasRenderingContext2D,
+        left: number,
+        top: number,
+        styleOverride: any,
+        fabricObject: any
+      ) {
+        styleOverride = styleOverride || {};
+        const xSize =
+          this.sizeX || styleOverride.cornerSize || fabricObject.cornerSize;
+        const ySize =
+          this.sizeY || styleOverride.cornerSize || fabricObject.cornerSize;
+        const transparentCorners =
+          typeof styleOverride.transparentCorners !== "undefined"
+            ? styleOverride.transparentCorners
+            : fabricObject.transparentCorners;
+        const methodName = transparentCorners ? "stroke" : "fill";
+        const stroke =
+          !transparentCorners &&
+          (styleOverride.cornerStrokeColor || fabricObject.cornerStrokeColor);
+        let myLeft = left,
+          myTop = top,
+          size: number;
+
+        ctx.save();
+        ctx.fillStyle =
+          styleOverride.cornerColor || fabricObject.cornerColor;
+        ctx.strokeStyle =
+          styleOverride.cornerStrokeColor || fabricObject.cornerStrokeColor;
+        if (xSize > ySize) {
+          size = xSize;
+          ctx.scale(1.0, ySize / xSize);
+          myTop = (top * xSize) / ySize;
+        } else if (ySize > xSize) {
+          size = ySize;
+          ctx.scale(xSize / ySize, 1.0);
+          myLeft = (left * ySize) / xSize;
+        } else {
+          size = xSize;
+        }
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(myLeft, myTop, size / 2, 0, 2 * Math.PI, false);
+        ctx[methodName]();
+        if (stroke) {
+          ctx.stroke();
+        }
+        ctx.restore();
+      };
+
       fabric.Text.prototype._setTextStyles = function (
         ctx: CanvasRenderingContext2D,
         charStyle: any,
@@ -102,12 +206,12 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       };
 
       const canvas = new fabric.Canvas(canvasEl, {
-        width: CANVAS_WIDTH,
-        height: CANVAS_HEIGHT,
+        width: template.canvas.width,
+        height: template.canvas.height,
         preserveObjectStacking: true,
         enableRetinaScaling: false,
         selection: true,
-        backgroundColor: "#0e0e0e",
+        backgroundColor: template.canvas.background || "#ffffff",
       });
 
       canvasRefState.current = canvas;
@@ -127,11 +231,7 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       canvas.on("selection:updated", updateSelection);
       canvas.on("selection:cleared", updateSelection);
 
-      await loadTemplate(canvas, fabric);
-      if (!disposed) {
-        resetHistory(JSON.stringify(canvas.toJSON()));
-        setReady(true);
-      }
+      await loadTemplateIntoCanvas(canvas, fabric, template);
     })();
 
     return () => {
@@ -140,8 +240,14 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         canvasRefState.current.dispose();
         canvasRefState.current = null;
       }
+      setReady(false);
     };
-  }, [canvasRef, capture, resetHistory]);
+  }, [canvasRef, template, capture, loadTemplateIntoCanvas]);
+
+  const canvasSize = useMemo(
+    () => template?.canvas || { width: 1748, height: 2480 },
+    [template]
+  );
 
   const addText = useCallback(
     (text = "Новый текст") => {
@@ -151,13 +257,13 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
 
       withoutHistory(() => {
         const t = new fabric.IText(text, {
-          left: CANVAS_WIDTH / 2,
-          top: CANVAS_HEIGHT / 2,
+          left: canvasSize.width / 2,
+          top: canvasSize.height / 2,
           originX: "center",
           originY: "center",
           fontFamily: "Montserrat, sans-serif",
           fontSize: 80,
-          fill: "#ffffff",
+          fill: "#000000",
           textAlign: "center",
           editable: true,
         });
@@ -166,7 +272,7 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         canvas.renderAll();
       });
     },
-    [withoutHistory]
+    [withoutHistory, canvasSize]
   );
 
   const addImageFromFile = useCallback(
@@ -179,28 +285,26 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       reader.onload = (e) => {
         const dataUrl = e.target?.result as string;
         withoutHistory(() => {
-          fabric.Image.fromURL(
-            dataUrl,
-            (img: any) => {
-              img.set({
-                left: CANVAS_WIDTH / 2,
-                top: CANVAS_HEIGHT / 2,
-                originX: "center",
-                originY: "center",
-              });
-              const maxW = CANVAS_WIDTH * 0.7;
-              if (img.width * (img.scaleX || 1) > maxW) {
-                img.scaleToWidth(maxW);
-              }
-              canvas.add(img);
-              canvas.setActiveObject(img);
-              canvas.renderAll();
+          fabric.Image.fromURL(dataUrl, (img: any) => {
+            img.set({
+              left: canvasSize.width / 2,
+              top: canvasSize.height / 2,
+              originX: "center",
+              originY: "center",
             });
+            const maxW = canvasSize.width * 0.7;
+            if (img.width * (img.scaleX || 1) > maxW) {
+              img.scaleToWidth(maxW);
+            }
+            canvas.add(img);
+            canvas.setActiveObject(img);
+            canvas.renderAll();
+          });
         });
       };
       reader.readAsDataURL(file);
     },
-    [withoutHistory]
+    [withoutHistory, canvasSize]
   );
 
   const addImageFromSrc = useCallback(
@@ -212,12 +316,12 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       withoutHistory(() => {
         fabric.Image.fromURL(src, (img: any) => {
           img.set({
-            left: CANVAS_WIDTH / 2,
-            top: CANVAS_HEIGHT / 2,
+            left: canvasSize.width / 2,
+            top: canvasSize.height / 2,
             originX: "center",
             originY: "center",
           });
-          const maxW = CANVAS_WIDTH * 0.7;
+          const maxW = canvasSize.width * 0.7;
           if (img.width * (img.scaleX || 1) > maxW) {
             img.scaleToWidth(maxW);
           }
@@ -227,7 +331,7 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         });
       });
     },
-    [withoutHistory]
+    [withoutHistory, canvasSize]
   );
 
   const addQR = useCallback(
@@ -283,29 +387,13 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
   const handleReset = useCallback(() => {
     const canvas = canvasRefState.current;
     const fabric = fabricRef.current;
-    if (!canvas || !fabric) return;
+    if (!canvas || !fabric || !template) return;
 
     skipHistory.current = true;
-    loadTemplate(canvas, fabric).then(() => {
-      resetHistory(JSON.stringify(canvas.toJSON()));
+    loadTemplateIntoCanvas(canvas, fabric, template).then(() => {
       skipHistory.current = false;
-      canvas.renderAll();
     });
-  }, [resetHistory]);
-
-  const setDigits = useCallback(
-    async (tens: string, units: string) => {
-      const canvas = canvasRefState.current;
-      const fabric = fabricRef.current;
-      if (!canvas || !fabric) return;
-
-      skipHistory.current = true;
-      await updateDigits(canvas, fabric, tens, units);
-      skipHistory.current = false;
-      capture();
-    },
-    [capture]
-  );
+  }, [template, loadTemplateIntoCanvas]);
 
   const downloadPNG = useCallback(() => {
     const canvas = canvasRefState.current;
@@ -326,7 +414,6 @@ export function useFabric(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     undo: handleUndo,
     redo: handleRedo,
     reset: handleReset,
-    setDigits,
     downloadPNG,
   };
 }

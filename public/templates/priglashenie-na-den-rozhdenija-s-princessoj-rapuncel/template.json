@@ -1,0 +1,201 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "id": 2174,
+    "slug": "priglashenie-na-den-rozhdenija-s-princessoj-rapuncel",
+    "title": "Приглашение на день рождения с принцессой Рапунцель",
+    "categoryIds": [
+      51,
+      18
+    ],
+    "categorySlugs": [
+      "girl",
+      "invitations"
+    ],
+    "categoryNames": [
+      "День рождения девочки",
+      "Приглашения"
+    ],
+    "preview": "/templates/priglashenie-na-den-rozhdenija-s-princessoj-rapuncel/preview.webp",
+    "sourceUrl": "https://evyt.ru/design/priglashenie-na-den-rozhdenija-s-princessoj-rapuncel/"
+  },
+  "stage": {
+    "width": 481,
+    "height": 683
+  },
+  "canvas": {
+    "width": 1748,
+    "height": 2482,
+    "background": "#ffffff"
+  },
+  "fonts": [
+    {
+      "family": "Anna",
+      "url": "/tpl-assets/fpd_fonts/Anna.ttf"
+    },
+    {
+      "family": "Alora",
+      "url": "/tpl-assets/fpd_fonts/Alora.ttf"
+    },
+    {
+      "family": "Isabelle",
+      "url": "/tpl-assets/fpd_fonts/Isabelle.ttf"
+    },
+    {
+      "family": "Flora Bold",
+      "url": "/tpl-assets/fpd_fonts/Flora_Bold.ttf"
+    }
+  ],
+  "objects": [
+    {
+      "type": "image",
+      "version": "5.3.0",
+      "src": "/tpl-assets/2024/11/invitation-design-1111-13.jpg",
+      "left": 874,
+      "top": 1241.043659043659,
+      "scaleX": 1.0041580041580043,
+      "scaleY": 1.0041580041580043,
+      "angle": 0,
+      "originX": "center",
+      "originY": "center",
+      "opacity": 1,
+      "selectable": false,
+      "evented": false,
+      "lockMovementX": true,
+      "lockMovementY": true,
+      "lockRotation": true,
+      "lockScalingX": true,
+      "lockScalingY": true
+    },
+    {
+      "type": "i-text",
+      "version": "5.3.0",
+      "text": "ДЕНЬ РОЖДЕНИЯ",
+      "left": 874,
+      "top": 1728.6509255145127,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "originX": "center",
+      "originY": "center",
+      "opacity": 1,
+      "fontFamily": "Anna",
+      "fontSize": 262,
+      "fill": "#f2379f",
+      "textAlign": "left",
+      "fontWeight": "normal",
+      "fontStyle": "normal",
+      "underline": false,
+      "lineHeight": 1,
+      "charSpacing": 0,
+      "styles": {},
+      "selectable": true,
+      "evented": true,
+      "editable": true
+    },
+    {
+      "type": "i-text",
+      "version": "5.3.0",
+      "text": "Ксюне исполняется 3 годика!",
+      "left": 874.0000000000001,
+      "top": 1961.0287279819204,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "originX": "center",
+      "originY": "center",
+      "opacity": 1,
+      "fontFamily": "Alora",
+      "fontSize": 138,
+      "fill": "#111111",
+      "textAlign": "center",
+      "fontWeight": "normal",
+      "fontStyle": "normal",
+      "underline": false,
+      "lineHeight": 1,
+      "charSpacing": 0,
+      "styles": {},
+      "selectable": true,
+      "evented": true,
+      "editable": true
+    },
+    {
+      "type": "i-text",
+      "version": "5.3.0",
+      "text": "Приглашение на",
+      "left": 837.4083012634405,
+      "top": 1485.3804135564455,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "originX": "center",
+      "originY": "center",
+      "opacity": 1,
+      "fontFamily": "Alora",
+      "fontSize": 153,
+      "fill": "#000000",
+      "textAlign": "left",
+      "fontWeight": "normal",
+      "fontStyle": "normal",
+      "underline": false,
+      "lineHeight": 1,
+      "charSpacing": 0,
+      "styles": {},
+      "selectable": true,
+      "evented": true,
+      "editable": true
+    },
+    {
+      "type": "i-text",
+      "version": "5.3.0",
+      "text": "10 марта в 16:00",
+      "left": 874.0000000000001,
+      "top": 2135.0870212204695,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "originX": "center",
+      "originY": "center",
+      "opacity": 1,
+      "fontFamily": "Isabelle",
+      "fontSize": 102,
+      "fill": "#6e37f2",
+      "textAlign": "left",
+      "fontWeight": "normal",
+      "fontStyle": "normal",
+      "underline": false,
+      "lineHeight": 1,
+      "charSpacing": 0,
+      "styles": {},
+      "selectable": true,
+      "evented": true,
+      "editable": true
+    },
+    {
+      "type": "i-text",
+      "version": "5.3.0",
+      "text": "Собираемся по адресу: \nг. Москва, ул. Праздника, 7",
+      "left": 874.0000000000001,
+      "top": 2314.453670741911,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "originX": "center",
+      "originY": "center",
+      "opacity": 1,
+      "fontFamily": "Flora Bold",
+      "fontSize": 80,
+      "fill": "#000000",
+      "textAlign": "center",
+      "fontWeight": "normal",
+      "fontStyle": "normal",
+      "underline": false,
+      "lineHeight": 0.9,
+      "charSpacing": 0,
+      "styles": {},
+      "selectable": true,
+      "evented": true,
+      "editable": true
+    }
+  ]
+}

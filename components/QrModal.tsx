@@ -39,7 +39,7 @@ export function QrModal({ open, onClose, onInsert }: QrModalProps) {
           <h3 className="text-lg font-semibold">Добавить QR-код</h3>
           <button
             onClick={onClose}
-            className="rounded-full p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+            className="cursor-pointer rounded-full p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
           >
             <X size={20} />
           </button>
@@ -58,7 +58,7 @@ export function QrModal({ open, onClose, onInsert }: QrModalProps) {
         <button
           onClick={handleGenerate}
           disabled={loading || !text.trim()}
-          className="w-full rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
+          className="w-full cursor-pointer rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
         >
           {loading ? "Генерация..." : "Вставить QR-код"}
         </button>
