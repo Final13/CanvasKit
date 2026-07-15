@@ -5,6 +5,7 @@ import type { TemplateCatalog, TemplateCategory } from "@/lib/templates";
 interface BreadcrumbsProps {
   catalog: TemplateCatalog;
   activeCategorySlug: string;
+  activeTemplateName?: string;
   onNavigate: (slug: string) => void;
 }
 
@@ -35,10 +36,13 @@ function getCategoryPath(
 export function Breadcrumbs({
   catalog,
   activeCategorySlug,
+  activeTemplateName,
   onNavigate,
 }: BreadcrumbsProps) {
   const path = getCategoryPath(catalog, activeCategorySlug);
   if (path.length === 0) return null;
+
+  const hasTemplate = Boolean(activeTemplateName);
 
   return (
     <nav
@@ -46,11 +50,19 @@ export function Breadcrumbs({
       className="flex flex-wrap items-center justify-center gap-2 text-sm text-zinc-500"
     >
       {path.map((cat, index) => {
-        const isLast = index === path.length - 1;
+        const isLastCategory = index === path.length - 1;
         return (
           <span key={cat.slug} className="flex items-center gap-2">
             {index > 0 && <span className="text-zinc-300">/</span>}
-            {isLast ? (
+            {isLastCategory && hasTemplate ? (
+              <button
+                type="button"
+                onClick={() => onNavigate(cat.slug)}
+                className="cursor-pointer hover:text-zinc-900 hover:underline"
+              >
+                {cat.name}
+              </button>
+            ) : isLastCategory ? (
               <span className="font-medium text-zinc-900">{cat.name}</span>
             ) : (
               <button
@@ -64,6 +76,12 @@ export function Breadcrumbs({
           </span>
         );
       })}
+      {activeTemplateName && (
+        <span className="flex items-center gap-2">
+          <span className="text-zinc-300">/</span>
+          <span className="font-medium text-zinc-900">{activeTemplateName}</span>
+        </span>
+      )}
     </nav>
   );
 }

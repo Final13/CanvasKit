@@ -50,6 +50,7 @@ export function TemplateEditorPage({ catalog }: TemplateEditorPageProps) {
         <Breadcrumbs
           catalog={catalog}
           activeCategorySlug={activeCategory}
+          activeTemplateName={selectedTemplate?.metadata.title}
           onNavigate={handleBreadcrumbNavigate}
         />
       </div>
