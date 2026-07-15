@@ -358,6 +358,21 @@ export function useFabric(
     });
   }, [withoutHistory]);
 
+  const updateActiveObject = useCallback(
+    (props: Record<string, unknown>) => {
+      const canvas = canvasRefState.current;
+      if (!canvas) return;
+      const active = canvas.getActiveObject();
+      if (!active) return;
+
+      withoutHistory(() => {
+        active.set(props);
+        canvas.renderAll();
+      });
+    },
+    [withoutHistory]
+  );
+
   const handleUndo = useCallback(() => {
     const canvas = canvasRefState.current;
     if (!canvas) return;
@@ -415,5 +430,6 @@ export function useFabric(
     redo: handleRedo,
     reset: handleReset,
     downloadPNG,
+    updateActiveObject,
   };
 }

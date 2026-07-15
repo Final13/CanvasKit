@@ -29,6 +29,8 @@ export function Editor({ template }: EditorProps) {
     redo,
     reset,
     downloadPNG,
+    activeObject,
+    updateActiveObject,
   } = useFabric(canvasElRef, template);
 
   useEffect(() => {
@@ -82,6 +84,9 @@ export function Editor({ template }: EditorProps) {
           onAddText={addText}
           onAddPhoto={addImageFromFile}
           onDigitsChange={() => {}}
+          activeObject={activeObject}
+          updateActiveObject={updateActiveObject}
+          fonts={template.fonts}
         />
       </div>
 

@@ -43,7 +43,7 @@ export function Breadcrumbs({
   return (
     <nav
       aria-label="Breadcrumb"
-      className="flex flex-wrap items-center gap-2 text-sm text-zinc-500"
+      className="flex flex-wrap items-center justify-center gap-2 text-sm text-zinc-500"
     >
       {path.map((cat, index) => {
         const isLast = index === path.length - 1;
