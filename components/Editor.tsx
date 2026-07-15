@@ -24,6 +24,8 @@ export function Editor({ template }: EditorProps) {
     addText,
     addImageFromFile,
     addQR,
+    updateDigits,
+    updateDigitColor,
     deleteSelected,
     undo,
     redo,
@@ -84,7 +86,8 @@ export function Editor({ template }: EditorProps) {
           activeTab={activeTab}
           onAddText={addText}
           onAddPhoto={addImageFromFile}
-          onDigitsChange={() => {}}
+          onDigitsChange={updateDigits}
+          onDigitColorChange={updateDigitColor}
           activeObject={activeObject}
           updateActiveObject={updateActiveObject}
           fonts={template.fonts}

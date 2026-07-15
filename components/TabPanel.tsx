@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useRef, ChangeEvent, useMemo } from "react";
-import { Type, ImagePlus, Bold, Italic } from "lucide-react";
+import { Type, ImagePlus, Bold, Italic, Crown } from "lucide-react";
 import type { TabKey } from "./EditorTabs";
 
 interface TabPanelProps {
   activeTab: TabKey;
   onAddText: () => void;
   onAddPhoto: (file: File) => void;
-  onDigitsChange: (tens: string, units: string) => void;
+  onDigitsChange: (age: number, color: string) => void;
+  onDigitColorChange: (age: number, color: string) => void;
   activeObject: any;
   updateActiveObject: (props: Record<string, unknown>) => void;
   fonts: { family: string; url?: string }[];
@@ -19,23 +20,19 @@ export function TabPanel({
   onAddText,
   onAddPhoto,
   onDigitsChange,
+  onDigitColorChange,
   activeObject,
   updateActiveObject,
   fonts,
 }: TabPanelProps) {
   const [age, setAge] = useState(30);
+  const [digitColor, setDigitColor] = useState("gold");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) onAddPhoto(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const applyDigits = () => {
-    const tens = age >= 10 ? String(Math.floor(age / 10)) : "";
-    const units = String(age % 10);
-    onDigitsChange(tens, units);
   };
 
   const isText =
@@ -66,27 +63,43 @@ export function TabPanel({
   return (
     <div className="w-full bg-white p-4 sm:p-5">
       {activeTab === "digits" && (
-        <div className="flex flex-col gap-3">
-          <p className="text-sm text-zinc-500">
-            Введите возраст, чтобы заменить золотые цифры на приглашении.
-          </p>
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={() => onDigitsChange(age, digitColor)}
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-black py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
+          >
+            <Crown size={18} />
+            Добавить цифры
+          </button>
+
           <div className="flex items-center gap-3">
             <input
               type="number"
               min={0}
               max={99}
               value={age}
-              onChange={(e) =>
-                setAge(Math.max(0, Math.min(99, Number(e.target.value))))
-              }
-              className="w-24 rounded-xl border border-zinc-300 px-4 py-2.5 text-center text-sm outline-none focus:border-black"
+              onChange={(e) => {
+                const next = Math.max(0, Math.min(99, Number(e.target.value)));
+                setAge(next);
+                onDigitColorChange(next, digitColor);
+              }}
+              className="w-20 rounded-xl border border-zinc-300 px-3 py-2.5 text-center text-sm outline-none focus:border-black"
             />
-            <button
-              onClick={applyDigits}
-              className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-black py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+            <select
+              value={digitColor}
+              onChange={(e) => {
+                const next = e.target.value;
+                setDigitColor(next);
+                onDigitColorChange(age, next);
+              }}
+              title="Цвет шаров"
+              className="min-w-0 flex-1 cursor-pointer rounded-xl border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-black"
             >
-              Применить
-            </button>
+              <option value="gold">Золотой</option>
+              <option value="blue">Синий</option>
+              <option value="pink">Розовый</option>
+              <option value="beige">Бежевый</option>
+            </select>
           </div>
         </div>
       )}

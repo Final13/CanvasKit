@@ -342,6 +342,123 @@ export function useFabric(
     [addImageFromSrc]
   );
 
+  const updateDigits = useCallback(
+    async (age: number, color: string) => {
+      const canvas = canvasRefState.current;
+      const fabric = fabricRef.current;
+      if (!canvas || !fabric) return;
+
+      const tens = age >= 10 ? String(Math.floor(age / 10)) : "";
+      const units = String(age % 10);
+
+      const existing = canvas
+        .getObjects()
+        .filter(
+          (obj: any) => obj.name === "digit-tens" || obj.name === "digit-units"
+        );
+
+      withoutHistory(() => {
+        existing.forEach((obj: any) => canvas.remove(obj));
+        canvas.renderAll();
+      });
+
+      const centerX = canvasSize.width / 2;
+      const top = canvasSize.height * 0.3;
+      const offset = canvasSize.width * 0.15;
+      const scale = (canvasSize.width / 1748) * 0.75;
+
+      const digitColorSets: Record<string, Set<string>> = {
+        default: new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]),
+        gold: new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]),
+        blue: new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]),
+        pink: new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]),
+        beige: new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]),
+      };
+
+      const neededDigits = [tens, units].filter(Boolean);
+      const hasAll = (c: string) =>
+        neededDigits.every((d) => digitColorSets[c]?.has(d));
+      const effectiveColor = hasAll(color) ? color : "gold";
+
+      const getDigitSrc = (value: string): string[] => {
+        const candidates: string[] = [];
+        if (effectiveColor && effectiveColor !== "default") {
+          candidates.push(`/tpl-assets/2024/10/number-${value}-${effectiveColor}.png`);
+        }
+        candidates.push(`/tpl-assets/2024/10/number-${value}.png`);
+        if (value === "7") {
+          candidates.push(`/tpl-assets/2024/10/number-7-gold.png`);
+        }
+        return candidates;
+      };
+
+      const loadDigitImage = (
+        value: string,
+        name: string,
+        left: number
+      ): Promise<void> => {
+        const candidates = getDigitSrc(value);
+
+        return new Promise((resolve) => {
+          let index = 0;
+          const tryNext = () => {
+            if (index >= candidates.length) {
+              resolve();
+              return;
+            }
+            const src = candidates[index++];
+            fabric.Image.fromURL(src, (img: any) => {
+              if (!img || !img.width) {
+                tryNext();
+                return;
+              }
+              withoutHistory(() => {
+                img.set({
+                  originX: "center",
+                  originY: "center",
+                  left,
+                  top,
+                  scaleX: scale,
+                  scaleY: scale,
+                  name,
+                  selectable: true,
+                  evented: true,
+                });
+                canvas.add(img);
+                canvas.moveTo(img, 1);
+                canvas.renderAll();
+              });
+              resolve();
+            });
+          };
+          tryNext();
+        });
+      };
+
+      const digits: Promise<void>[] = [];
+      if (tens) digits.push(loadDigitImage(tens, "digit-tens", centerX - offset));
+      if (units) digits.push(loadDigitImage(units, "digit-units", centerX + offset));
+
+      await Promise.all(digits);
+    },
+    [canvasSize, withoutHistory]
+  );
+
+  const updateDigitColor = useCallback(
+    (age: number, color: string) => {
+      const canvas = canvasRefState.current;
+      if (!canvas) return;
+      const existing = canvas
+        .getObjects()
+        .filter(
+          (obj: any) => obj.name === "digit-tens" || obj.name === "digit-units"
+        );
+      if (existing.length === 0) return;
+      updateDigits(age, color);
+    },
+    [updateDigits]
+  );
+
   const deleteSelected = useCallback(() => {
     const canvas = canvasRefState.current;
     if (!canvas) return;
@@ -430,6 +547,8 @@ export function useFabric(
     addText,
     addImageFromFile,
     addQR,
+    updateDigits,
+    updateDigitColor,
     deleteSelected,
     undo: handleUndo,
     redo: handleRedo,
