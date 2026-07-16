@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
+
+export const metadata: Metadata = {
+  title: "Контакты — Event Space",
+  description:
+    "Свяжитесь с нами по любым вопросам: выбор шаблона, оформление заказа, оплата и поддержка.",
+};
 
 export default function ContactsPage() {
   return (

@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
+
+export const metadata: Metadata = {
+  title: "Пользовательское соглашение — Event Space",
+  description:
+    "Условия использования сайта Event Space и правила оказания платных услуг.",
+};
 
 export default function TermsPage() {
   return (

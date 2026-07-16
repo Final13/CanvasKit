@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
+
+export const metadata: Metadata = {
+  title: "Политика cookie — Event Space",
+  description:
+    "Информация об использовании файлов cookie на сайте Event Space.",
+};
 
 export default function CookiesPage() {
   return (

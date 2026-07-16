@@ -1,30 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "evspc-cookie-consent";
 
+function subscribe(callback: () => void) {
+  const handler = (e: StorageEvent) => {
+    if (e.key === STORAGE_KEY) callback();
+  };
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
+}
+
+function getSnapshot(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== "1";
+  } catch {
+    return false;
+  }
+}
+
+function getServerSnapshot(): boolean {
+  return false;
+}
+
 export function CookieBanner() {
-  const [visible, setVisible] = useState(false);
+  const visible = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot
+  );
 
-  useEffect(() => {
-    try {
-      const accepted = localStorage.getItem(STORAGE_KEY);
-      if (!accepted) setVisible(true);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  const accept = () => {
+  const accept = useCallback(() => {
     try {
       localStorage.setItem(STORAGE_KEY, "1");
     } catch {
       // ignore
     }
-    setVisible(false);
-  };
+    window.dispatchEvent(new StorageEvent("storage", { key: STORAGE_KEY }));
+  }, []);
 
   if (!visible) return null;
 

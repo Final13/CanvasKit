@@ -538,6 +538,12 @@ export function useFabric(
     downloadDataUrl(dataUrl, "priglashenie.png");
   }, []);
 
+  const getCanvasJson = useCallback(() => {
+    const canvas = canvasRefState.current;
+    if (!canvas) return null;
+    return JSON.stringify(canvas.toJSON());
+  }, []);
+
   return {
     ready,
     activeObject,
@@ -554,6 +560,7 @@ export function useFabric(
     redo: handleRedo,
     reset: handleReset,
     downloadPNG,
+    getCanvasJson,
     updateActiveObject,
   };
 }

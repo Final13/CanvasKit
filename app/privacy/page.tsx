@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
+
+export const metadata: Metadata = {
+  title: "Политика конфиденциальности — Event Space",
+  description:
+    "Политика обработки и защиты персональных данных пользователей Event Space.",
+};
 
 export default function PrivacyPage() {
   return (

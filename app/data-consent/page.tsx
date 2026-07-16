@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
+
+export const metadata: Metadata = {
+  title: "Согласие на обработку данных — Event Space",
+  description:
+    "Согласие на обработку персональных данных пользователей сайта Event Space.",
+};
 
 export default function DataConsentPage() {
   return (

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CookieBanner } from "@/components/CookieBanner";
+import { CartProvider } from "@/components/CartProvider";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -42,10 +43,12 @@ export default function RootLayout({
       className={`${montserrat.variable} ${marckScript.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-zinc-50 font-sans">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <CookieBanner />
+        <CartProvider>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <CookieBanner />
+        </CartProvider>
       </body>
     </html>
   );

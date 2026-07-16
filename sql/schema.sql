@@ -1,0 +1,50 @@
+CREATE DATABASE IF NOT EXISTS evspc_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE evspc_db;
+
+CREATE TABLE IF NOT EXISTS users (
+  id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS orders (
+  id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  user_id CHAR(36) NOT NULL,
+  status ENUM('pending','paid','cancelled') DEFAULT 'pending',
+  total DECIMAL(10,2) NOT NULL,
+  customer_name VARCHAR(255),
+  customer_email VARCHAR(255),
+  payment_id VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS order_items (
+  id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  order_id CHAR(36) NOT NULL,
+  template_slug VARCHAR(255) NOT NULL,
+  template_title VARCHAR(500),
+  preview_url VARCHAR(500),
+  price DECIMAL(10,2) NOT NULL,
+  customization_json LONGTEXT,
+  INDEX idx_order_id (order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS yookassa_payments (
+  id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  order_id CHAR(36) NOT NULL,
+  yookassa_payment_id VARCHAR(255) NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  status VARCHAR(50),
+  payload_json LONGTEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_order_id (order_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

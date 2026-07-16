@@ -7,6 +7,9 @@ import { EditorTabs, type TabKey } from "./EditorTabs";
 import { TabPanel } from "./TabPanel";
 import { QrModal } from "./QrModal";
 import type { TemplateData } from "@/lib/templates";
+import { useCart } from "@/components/CartProvider";
+import { CartSidebar } from "@/components/CartSidebar";
+import { DEFAULT_PRICE, formatPrice } from "@/lib/cart";
 
 interface EditorProps {
   template: TemplateData;
@@ -15,7 +18,9 @@ interface EditorProps {
 export function Editor({ template }: EditorProps) {
   const canvasElRef = useRef<HTMLCanvasElement>(null);
   const [qrOpen, setQrOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>("text");
+  const { addItem } = useCart();
 
   const {
     ready,
@@ -31,9 +36,23 @@ export function Editor({ template }: EditorProps) {
     redo,
     reset,
     downloadPNG,
+    getCanvasJson,
     activeObject,
     updateActiveObject,
   } = useFabric(canvasElRef, template);
+
+  const handleAddToCart = () => {
+    const customizationJson = getCanvasJson();
+    if (!customizationJson) return;
+    addItem({
+      templateSlug: template.metadata.slug,
+      templateTitle: template.metadata.title,
+      previewUrl: `/templates/${template.metadata.slug}/preview.webp`,
+      price: DEFAULT_PRICE,
+      customizationJson,
+    });
+    setCartOpen(true);
+  };
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -93,6 +112,29 @@ export function Editor({ template }: EditorProps) {
         />
       </div>
 
+      <div className="mt-6 w-full max-w-sm sm:max-w-md md:max-w-lg">
+        <div className="rounded-2xl bg-white p-6 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-zinc-500">Цена за приглашение</p>
+              <p className="text-2xl font-bold text-zinc-900">
+                {formatPrice(DEFAULT_PRICE)}
+              </p>
+            </div>
+            <button
+              onClick={handleAddToCart}
+              className="rounded-xl bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-500"
+            >
+              В корзину
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-zinc-500">
+            Редактировать приглашение и вносить свои данные можно до оформления
+            заказа. После оплаты файлы будут доступны в личном кабинете.
+          </p>
+        </div>
+      </div>
+
       <QrModal
         open={qrOpen}
         onClose={() => setQrOpen(false)}
@@ -101,6 +143,8 @@ export function Editor({ template }: EditorProps) {
           setQrOpen(false);
         }}
       />
+
+      <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   );
 }

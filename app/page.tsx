@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { loadCatalog } from "@/lib/templates";
 import { HeroSection } from "@/components/HeroSection";
 import { StepsSection } from "@/components/StepsSection";
@@ -5,6 +6,12 @@ import { CategorySection } from "@/components/CategorySection";
 import { AgeSection } from "@/components/AgeSection";
 import { SeoTextSection } from "@/components/SeoTextSection";
 import { SupportCtaSection } from "@/components/SupportCtaSection";
+
+export const metadata: Metadata = {
+  title: "Event Space — конструктор приглашений",
+  description:
+    "Создавайте персонализированные приглашения на день рождения, юбилей и другие праздники онлайн. Быстро, просто, с мгновенным скачиванием.",
+};
 
 export default async function Home() {
   const catalog = await loadCatalog();

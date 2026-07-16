@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { loadCatalog } from "@/lib/templates";
 import {
@@ -12,6 +13,25 @@ import { CategoryBrowser } from "@/components/CategoryBrowser";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: CategoryPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const catalog = await loadCatalog();
+  const category = getCategoryBySlug(catalog, slug);
+
+  if (!category) {
+    return {
+      title: "Категория не найдена — Event Space",
+    };
+  }
+
+  return {
+    title: `${category.name} — Event Space`,
+    description: `Шаблоны приглашений в категории «${category.name}». Выберите дизайн и персонализируйте текст и фото онлайн.`,
+  };
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {

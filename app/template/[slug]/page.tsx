@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import fs from "fs/promises";
 import path from "path";
@@ -24,6 +25,24 @@ async function loadTemplate(slug: string): Promise<TemplateData | null> {
   } catch {
     return null;
   }
+}
+
+export async function generateMetadata({
+  params,
+}: TemplatePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const template = await loadTemplate(slug);
+
+  if (!template) {
+    return {
+      title: "Шаблон не найден — Event Space",
+    };
+  }
+
+  return {
+    title: `${template.metadata.title} — Event Space`,
+    description: `Редактор приглашения «${template.metadata.title}». Настройте текст, фото и QR-код, скачайте готовый файл после оплаты.`,
+  };
 }
 
 export default async function TemplatePage({ params }: TemplatePageProps) {
