@@ -177,46 +177,67 @@ export default function CheckoutPage() {
                 Детали оплаты
               </h2>
               <p className="mt-2 text-sm text-zinc-500">
-                Введите имя и добавьте адрес электронной почты. Этих данных будет
-                достаточно, чтобы совершить заказ. Файлы для скачивания будут
-                доступны сразу после оплаты! Аккаунт создаётся автоматически 😊
+                {user
+                  ? "Проверьте данные и подтвердите заказ. Файлы для скачивания будут доступны сразу после оплаты."
+                  : "Введите имя и добавьте адрес электронной почты. Этих данных будет достаточно, чтобы совершить заказ. Файлы для скачивания будут доступны сразу после оплаты! Аккаунт создаётся автоматически 😊"}
               </p>
 
+              {user && (
+                <div className="mt-4 rounded-xl bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
+                  Вы оформляете заказ как{" "}
+                  <span className="font-medium text-zinc-900">{user.email}</span>
+                </div>
+              )}
+
               <div className="mt-6 space-y-4">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-zinc-900"
-                  >
-                    Имя <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Введите ваше имя"
-                    className="mt-1 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-fuchsia-400"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-zinc-900"
-                  >
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Добавьте электронную почту"
-                    className="mt-1 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-fuchsia-400"
-                  />
-                </div>
+                {user?.name ? (
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-900">
+                      Имя
+                    </label>
+                    <div className="mt-1 rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
+                      {user.name}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-zinc-900"
+                    >
+                      Имя <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Введите ваше имя"
+                      className="mt-1 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-fuchsia-400"
+                    />
+                  </div>
+                )}
+
+                {user ? null : (
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-zinc-900"
+                    >
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Добавьте электронную почту"
+                      className="mt-1 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-fuchsia-400"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -248,7 +269,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={loading || !canCheckout}
-              className="w-full rounded-full bg-fuchsia-300 py-3.5 text-sm font-semibold text-zinc-900 transition hover:bg-fuchsia-400 disabled:opacity-60"
+              className="w-full cursor-pointer rounded-full bg-fuchsia-300 py-3.5 text-sm font-semibold text-zinc-900 transition hover:bg-fuchsia-400 disabled:opacity-60"
             >
               {loading ? "Оформление…" : "Подтвердить заказ"}
             </button>

@@ -29,8 +29,8 @@ body {
   height: 100% !important;
 }
 
-button,
+button:not(:disabled),
 a,
-[role="button"] {
-  cursor: pointer;
+[role="button"]:not(:disabled) {
+  cursor: pointer !important;
 }
