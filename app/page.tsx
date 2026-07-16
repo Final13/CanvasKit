@@ -1,20 +1,55 @@
 import { loadCatalog } from "@/lib/templates";
-import { TemplateEditorPage } from "@/components/TemplateEditorPage";
+import { HeroSection } from "@/components/HeroSection";
+import { StepsSection } from "@/components/StepsSection";
+import { CategorySection } from "@/components/CategorySection";
+import { AgeSection } from "@/components/AgeSection";
+import { SeoTextSection } from "@/components/SeoTextSection";
+import { SupportCtaSection } from "@/components/SupportCtaSection";
 
 export default async function Home() {
   const catalog = await loadCatalog();
 
+  const heroPreviews = catalog.templates
+    .filter((t) => t.preview)
+    .slice(0, 3)
+    .map((t) => t.preview!);
+
   return (
-    <main className="flex min-h-screen flex-col items-center bg-zinc-50 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 text-center sm:mb-8">
-        <h1 className="text-xl font-normal text-zinc-900 sm:text-2xl md:text-3xl">
-          Конструктор приглашений
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500">
-          Выберите шаблон, отредактируйте текст и фото, скачайте PNG
-        </p>
-      </div>
-      <TemplateEditorPage catalog={catalog} />
-    </main>
+    <>
+      <HeroSection previews={heroPreviews} />
+      <StepsSection />
+      <CategorySection
+        title="Приглашения детям"
+        tabs={[
+          { label: "Девочке", slug: "girl" },
+          { label: "Мальчику", slug: "boy" },
+        ]}
+        catalog={catalog}
+        seeAllHref="/category/kids"
+      />
+      <CategorySection
+        title="Приглашения взрослым"
+        tabs={[
+          { label: "Женщине", slug: "woman" },
+          { label: "Мужчине", slug: "man" },
+        ]}
+        catalog={catalog}
+        seeAllHref="/category/birthday"
+      />
+      <AgeSection />
+      <CategorySection
+        title="Популярные темы"
+        tabs={[
+          { label: "Гендер-пати", slug: "gender-party" },
+          { label: "Концерт", slug: "concert" },
+          { label: "В стиле 90-х", slug: "90s-style" },
+          { label: "Девичник", slug: "bachelorette" },
+        ]}
+        catalog={catalog}
+        seeAllHref="/category/invitations"
+      />
+      <SeoTextSection />
+      <SupportCtaSection />
+    </>
   );
 }

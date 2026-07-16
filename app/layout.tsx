@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { Montserrat, Marck_Script } from "next/font/google";
 import "./globals.css";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { CookieBanner } from "@/components/CookieBanner";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin", "cyrillic"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const marckScript = Marck_Script({
@@ -15,8 +18,9 @@ const marckScript = Marck_Script({
 });
 
 export const metadata: Metadata = {
-  title: "Конструктор приглашений",
-  description: "Редактор приглашений на праздники, мероприятия и торжества",
+  title: "Event Space — конструктор приглашений",
+  description:
+    "Создавайте и скачивайте персонализированные приглашения на праздники, дни рождения и юбилеи за пару минут",
   robots: {
     index: false,
     follow: false,
@@ -37,8 +41,11 @@ export default function RootLayout({
       lang="ru"
       className={`${montserrat.variable} ${marckScript.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-100 font-sans">
-        {children}
+      <body className="min-h-full flex flex-col bg-zinc-50 font-sans">
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
+        <CookieBanner />
       </body>
     </html>
   );
