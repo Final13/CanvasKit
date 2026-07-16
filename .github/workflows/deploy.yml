@@ -41,7 +41,8 @@ jobs:
           fingerprint: SHA256:Qr2NxYB/EC3iS4rP0ls1GVLa/2onA0WUC1GoHQJOkNc
           script_stop: true
           script: |
-            cd /home/evspc/www/evspc.com
+            mkdir -p /var/www/evspc/data/www/evspc.com
+            cd /var/www/evspc/data/www/evspc.com
 
             # Remove old source files, keep node_modules for faster installs
             find . -mindepth 1 -maxdepth 1 ! -name 'node_modules' -exec rm -rf {} + 2>/dev/null

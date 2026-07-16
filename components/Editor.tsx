@@ -32,7 +32,6 @@ export function Editor({ template }: EditorProps) {
     reset,
     downloadPNG,
     activeObject,
-    activeObjectTick,
     updateActiveObject,
   } = useFabric(canvasElRef, template);
 

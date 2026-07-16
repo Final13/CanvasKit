@@ -4,7 +4,7 @@ module.exports = {
       name: "canvaskit",
       script: "npm",
       args: "run start",
-      cwd: "/home/evspc/www/evspc.com",
+      cwd: "/var/www/evspc/data/www/evspc.com",
       env: {
         NODE_ENV: "production",
         PORT: 3000,
