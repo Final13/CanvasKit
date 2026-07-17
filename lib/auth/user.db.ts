@@ -50,3 +50,16 @@ export async function findUserById(id: string): Promise<User | null> {
   ]);
   return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
 }
+
+export async function updateUserPassword(
+  id: string,
+  passwordHash: string
+): Promise<void> {
+  const db = getMysqlClient();
+  if (!db) throw new Error("Database not available");
+
+  await db.query("UPDATE users SET password_hash = ? WHERE id = ?", [
+    passwordHash,
+    id,
+  ]);
+}

@@ -155,3 +155,22 @@ export async function setOrderPaymentId(
     id,
   ]);
 }
+
+/**
+ * Slug'и шаблонов из оплаченных заказов пользователя.
+ */
+export async function getPurchasedTemplateSlugs(
+  userId: string
+): Promise<string[]> {
+  const db = getMysqlClient();
+  if (!db) return [];
+
+  const rows = await db.query<{ template_slug: string }[]>(
+    `SELECT DISTINCT oi.template_slug
+     FROM order_items oi
+     JOIN orders o ON o.id = oi.order_id
+     WHERE o.user_id = ? AND o.status = 'paid'`,
+    [userId]
+  );
+  return Array.isArray(rows) ? rows.map((r) => r.template_slug) : [];
+}

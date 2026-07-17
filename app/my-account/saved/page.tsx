@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { findUserById } from "@/lib/auth/user.db";
+import { getSavedDesignsByUserId } from "@/lib/designs/design.db";
+import { getPurchasedTemplateSlugs } from "@/lib/orders/order.db";
 import { AccountSidebar } from "@/components/account/AccountSidebar";
+import { SavedDesigns } from "@/components/account/SavedDesigns";
 
 export const metadata: Metadata = {
   title: "Сохранённые дизайны — Event Space",
@@ -13,11 +16,27 @@ export default async function SavedDesignsPage() {
   const session = await getSession();
   if (!session.userId) redirect("/my-account?redirect=/my-account/saved");
 
-  const user = await findUserById(session.userId);
+  const [user, designs, purchasedSlugs] = await Promise.all([
+    findUserById(session.userId),
+    getSavedDesignsByUserId(session.userId),
+    getPurchasedTemplateSlugs(session.userId),
+  ]);
+
   if (!user) {
     await session.destroy();
     redirect("/my-account");
   }
+
+  const serializedDesigns = designs.map((design) => ({
+    id: design.id,
+    templateSlug: design.template_slug,
+    name: design.name,
+    preview: design.preview,
+    configJson: design.config_json,
+    createdAt: design.created_at
+      ? new Date(design.created_at).toISOString()
+      : null,
+  }));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -29,9 +48,10 @@ export default async function SavedDesignsPage() {
           <AccountSidebar name={user.name} email={user.email} />
         </div>
         <div className="lg:col-span-8">
-          <div className="rounded-2xl border border-zinc-100 bg-white p-8 text-center shadow-sm">
-            <p className="text-zinc-500">Сохранённые дизайны появятся здесь.</p>
-          </div>
+          <SavedDesigns
+            designs={serializedDesigns}
+            purchasedSlugs={purchasedSlugs}
+          />
         </div>
       </div>
     </div>

@@ -6,21 +6,32 @@ import { Toolbar } from "./Toolbar";
 import { EditorTabs, type TabKey } from "./EditorTabs";
 import { TabPanel } from "./TabPanel";
 import { QrModal } from "./QrModal";
+import { SaveDesignModal, type SaveTarget } from "./SaveDesignModal";
 import type { TemplateData } from "@/lib/templates";
 import { useCart } from "@/components/CartProvider";
 import { CartSidebar } from "@/components/CartSidebar";
 import { DEFAULT_PRICE, formatPrice } from "@/lib/cart";
+import {
+  getDesignDraft,
+  saveDesignDraft,
+  clearDesignDraft,
+} from "@/lib/design-draft";
 
 interface EditorProps {
   template: TemplateData;
+  isAuthenticated?: boolean;
 }
 
-export function Editor({ template }: EditorProps) {
+export function Editor({ template, isAuthenticated = false }: EditorProps) {
   const canvasElRef = useRef<HTMLCanvasElement>(null);
   const [qrOpen, setQrOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>("text");
   const { addItem } = useCart();
+
+  const slug = template.metadata.slug;
+  const [draft] = useState(() => getDesignDraft(slug));
 
   const {
     ready,
@@ -35,23 +46,57 @@ export function Editor({ template }: EditorProps) {
     undo,
     redo,
     reset,
-    downloadPNG,
+    getPreviewDataUrl,
     getCanvasJson,
     activeObject,
     updateActiveObject,
-  } = useFabric(canvasElRef, template);
+  } = useFabric(canvasElRef, template, draft?.json ?? null);
 
   const handleAddToCart = () => {
     const customizationJson = getCanvasJson();
     if (!customizationJson) return;
     addItem({
-      templateSlug: template.metadata.slug,
+      templateSlug: slug,
       templateTitle: template.metadata.title,
-      previewUrl: `/templates/${template.metadata.slug}/preview.webp`,
+      previewUrl: `/templates/${slug}/preview.webp`,
       price: DEFAULT_PRICE,
       customizationJson,
     });
     setCartOpen(true);
+  };
+
+  const handleReset = () => {
+    clearDesignDraft(slug);
+    reset();
+  };
+
+  const handleSaveDesign = async (
+    name: string,
+    email?: string
+  ): Promise<SaveTarget> => {
+    const customizationJson = getCanvasJson();
+    if (!customizationJson) throw new Error("Редактор ещё загружается");
+
+    saveDesignDraft(slug, name, customizationJson);
+
+    if (!isAuthenticated && !email) return "local";
+
+    const res = await fetch("/api/designs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        templateSlug: slug,
+        name,
+        preview: getPreviewDataUrl() ?? undefined,
+        configJson: customizationJson,
+        email,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || data.error || "Ошибка сохранения");
+    }
+    return "account";
   };
 
   useEffect(() => {
@@ -80,9 +125,9 @@ export function Editor({ template }: EditorProps) {
           canRedo={canRedo}
           onUndo={undo}
           onRedo={redo}
-          onReset={reset}
+          onReset={handleReset}
           onQR={() => setQrOpen(true)}
-          onDownload={downloadPNG}
+          onSave={() => setSaveOpen(true)}
         />
 
         <EditorTabs active={activeTab} onChange={setActiveTab} />
@@ -142,6 +187,14 @@ export function Editor({ template }: EditorProps) {
           addQR(dataUrl);
           setQrOpen(false);
         }}
+      />
+
+      <SaveDesignModal
+        open={saveOpen}
+        onClose={() => setSaveOpen(false)}
+        isAuthenticated={isAuthenticated}
+        defaultName={template.metadata.title}
+        onSave={handleSaveDesign}
       />
 
       <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />

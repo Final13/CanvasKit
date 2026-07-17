@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import path from "path";
 import type { TemplateData } from "@/lib/templates";
 import { loadCatalog } from "@/lib/templates";
+import { getSession } from "@/lib/auth/session";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Editor } from "@/components/Editor";
 
@@ -60,6 +61,8 @@ export default async function TemplatePage({ params }: TemplatePageProps) {
     (s) => s !== "invitations"
   ) ?? "invitations";
 
+  const session = await getSession();
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <Breadcrumbs
@@ -70,7 +73,7 @@ export default async function TemplatePage({ params }: TemplatePageProps) {
         {template.metadata.title}
       </h1>
       <div className="mt-6 flex justify-center">
-        <Editor template={template} />
+        <Editor template={template} isAuthenticated={Boolean(session.userId)} />
       </div>
     </div>
   );

@@ -5,16 +5,7 @@ import type { TemplateData } from "@/lib/templates";
 
 export type FabricCanvas = any;
 
-function downloadDataUrl(dataUrl: string, filename: string) {
-  const link = document.createElement("a");
-  link.href = dataUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
-function injectFonts(fonts: { family: string; url?: string }[]) {
+export function injectFonts(fonts: { family: string; url?: string }[]) {
   if (typeof document === "undefined") return;
   const styleId = "template-fonts";
   let style = document.getElementById(styleId) as HTMLStyleElement | null;
@@ -33,7 +24,7 @@ function injectFonts(fonts: { family: string; url?: string }[]) {
   style.textContent = css;
 }
 
-async function loadFonts(fonts: { family: string; url?: string }[]) {
+export async function loadFonts(fonts: { family: string; url?: string }[]) {
   const families = fonts.filter((f) => f.url).map((f) => `${f.family}`);
   if (!families.length || typeof document === "undefined") return;
   try {
@@ -45,7 +36,8 @@ async function loadFonts(fonts: { family: string; url?: string }[]) {
 
 export function useFabric(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  template: TemplateData | null
+  template: TemplateData | null,
+  initialJson?: string | null
 ) {
   const [ready, setReady] = useState(false);
   const fabricRef = useRef<any>(null);
@@ -83,7 +75,7 @@ export function useFabric(
   );
 
   const loadTemplateIntoCanvas = useCallback(
-    async (canvas: any, fabric: any, tpl: TemplateData) => {
+    async (canvas: any, fabric: any, tpl: TemplateData, jsonOverride?: string | null) => {
       if (!canvas || !fabric || !tpl) return;
 
       injectFonts(tpl.fonts || []);
@@ -93,20 +85,26 @@ export function useFabric(
       canvas.setHeight(tpl.canvas.height);
       canvas.backgroundColor = tpl.canvas.background || "#ffffff";
 
-      skipHistory.current = true;
-      canvas.loadFromJSON(
-        {
-          version: "5.3.0",
-          objects: tpl.objects,
-          background: tpl.canvas.background || "",
-        },
-        () => {
-          canvas.renderAll();
-          resetHistory(JSON.stringify(canvas.toJSON()));
-          skipHistory.current = false;
-          setReady(true);
+      let source: unknown = {
+        version: "5.3.0",
+        objects: tpl.objects,
+        background: tpl.canvas.background || "",
+      };
+      if (jsonOverride) {
+        try {
+          source = JSON.parse(jsonOverride);
+        } catch {
+          // невалидный черновик — грузим шаблон по умолчанию
         }
-      );
+      }
+
+      skipHistory.current = true;
+      canvas.loadFromJSON(source, () => {
+        canvas.renderAll();
+        resetHistory(JSON.stringify(canvas.toJSON()));
+        skipHistory.current = false;
+        setReady(true);
+      });
     },
     [resetHistory]
   );
@@ -232,7 +230,7 @@ export function useFabric(
       canvas.on("selection:updated", updateSelection);
       canvas.on("selection:cleared", updateSelection);
 
-      await loadTemplateIntoCanvas(canvas, fabric, template);
+      await loadTemplateIntoCanvas(canvas, fabric, template, initialJson);
     })();
 
     return () => {
@@ -243,7 +241,7 @@ export function useFabric(
       }
       setReady(false);
     };
-  }, [canvasRef, template, capture, loadTemplateIntoCanvas]);
+  }, [canvasRef, template, initialJson, capture, loadTemplateIntoCanvas]);
 
   const canvasSize = useMemo(
     () => template?.canvas || { width: 1748, height: 2480 },
@@ -531,11 +529,15 @@ export function useFabric(
     });
   }, [template, loadTemplateIntoCanvas]);
 
-  const downloadPNG = useCallback(() => {
+  const getPreviewDataUrl = useCallback((maxWidth = 320) => {
     const canvas = canvasRefState.current;
-    if (!canvas) return;
-    const dataUrl = canvas.toDataURL({ format: "png", multiplier: 1 });
-    downloadDataUrl(dataUrl, "priglashenie.png");
+    if (!canvas) return null;
+    const multiplier = Math.min(1, maxWidth / canvas.getWidth());
+    return canvas.toDataURL({
+      format: "jpeg",
+      quality: 0.8,
+      multiplier,
+    }) as string;
   }, []);
 
   const getCanvasJson = useCallback(() => {
@@ -559,7 +561,7 @@ export function useFabric(
     undo: handleUndo,
     redo: handleRedo,
     reset: handleReset,
-    downloadPNG,
+    getPreviewDataUrl,
     getCanvasJson,
     updateActiveObject,
   };

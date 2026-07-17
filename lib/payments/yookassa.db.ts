@@ -62,3 +62,16 @@ export async function getYookassaPaymentByYookassaId(
   );
   return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
 }
+
+export async function getLatestYookassaPaymentByOrderId(
+  orderId: string
+): Promise<YookassaPaymentRecord | null> {
+  const db = getMysqlClient();
+  if (!db) return null;
+
+  const rows = await db.query<YookassaPaymentRecord[]>(
+    "SELECT * FROM yookassa_payments WHERE order_id = ? ORDER BY created_at DESC LIMIT 1",
+    [orderId]
+  );
+  return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
+}

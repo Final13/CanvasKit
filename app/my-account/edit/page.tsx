@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { findUserById } from "@/lib/auth/user.db";
 import { AccountSidebar } from "@/components/account/AccountSidebar";
+import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 
 export const metadata: Metadata = {
   title: "Изменить аккаунт — Event Space",
@@ -29,9 +30,7 @@ export default async function EditAccountPage() {
           <AccountSidebar name={user.name} email={user.email} />
         </div>
         <div className="lg:col-span-8">
-          <div className="rounded-2xl border border-zinc-100 bg-white p-8 text-center shadow-sm">
-            <p className="text-zinc-500">Редактирование профиля в разработке.</p>
-          </div>
+          <ChangePasswordForm />
         </div>
       </div>
     </div>

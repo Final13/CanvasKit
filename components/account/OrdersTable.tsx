@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/cart";
 import type { Order } from "@/lib/orders/order.db";
@@ -106,9 +107,12 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                       Оплатить
                     </button>
                   )}
-                  <button className="rounded-full bg-zinc-100 px-4 py-1.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-200">
+                  <Link
+                    href={`/my-account/orders/${order.id}`}
+                    className="rounded-full bg-zinc-100 px-4 py-1.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-200"
+                  >
                     Просмотр
-                  </button>
+                  </Link>
                   {order.status === "pending" && (
                     <button
                       onClick={() => handleCancel(order.id)}
