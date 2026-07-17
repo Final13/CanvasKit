@@ -1,9 +1,22 @@
 import { YooCheckout, type ICreatePayment } from "@a2seven/yoo-checkout";
 
+/**
+ * Тестовый режим (тестовые карты ЮKassa) используется на Vercel и в dev,
+ * боевые ключи — только на продакшен-сервере (PM2, NODE_ENV=production).
+ */
+export function isYookassaTestMode(): boolean {
+  return process.env.VERCEL === "1" || process.env.NODE_ENV !== "production";
+}
+
 function getConfig() {
-  const shopId = process.env.YOOKASSA_SHOP_ID;
-  const secretKey = process.env.YOOKASSA_SECRET_KEY;
-  return { shopId, secretKey };
+  const testMode = isYookassaTestMode();
+  const shopId = testMode
+    ? process.env.YOOKASSA_TEST_SHOP_ID
+    : process.env.YOOKASSA_SHOP_ID;
+  const secretKey = testMode
+    ? process.env.YOOKASSA_TEST_SECRET_KEY
+    : process.env.YOOKASSA_SECRET_KEY;
+  return { shopId, secretKey, testMode };
 }
 
 export function isYookassaConfigured(): boolean {
@@ -12,8 +25,15 @@ export function isYookassaConfigured(): boolean {
 }
 
 function getCheckout(): YooCheckout | null {
-  const { shopId, secretKey } = getConfig();
-  if (!shopId || !secretKey) return null;
+  const { shopId, secretKey, testMode } = getConfig();
+  if (!shopId || !secretKey) {
+    console.warn(
+      testMode
+        ? "YooKassa test mode: set YOOKASSA_TEST_SHOP_ID / YOOKASSA_TEST_SECRET_KEY"
+        : "YooKassa is not configured"
+    );
+    return null;
+  }
   return new YooCheckout({ shopId, secretKey });
 }
 
@@ -36,10 +56,7 @@ export interface CreatePaymentInput {
 
 export async function createYookassaPayment(input: CreatePaymentInput) {
   const checkout = getCheckout();
-  if (!checkout) {
-    console.warn("YooKassa is not configured");
-    return null;
-  }
+  if (!checkout) return null;
 
   const idempotenceKey = crypto.randomUUID();
 
