@@ -10,9 +10,28 @@ import {
 import { TemplateCard } from "@/components/TemplateCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CategoryBrowser } from "@/components/CategoryBrowser";
+import type { TemplateMeta } from "@/lib/templates";
+
+/**
+ * sort=new — сначала новые (по убыванию id);
+ * sort=popular — по охвату категорий (прокси популярности), затем по новизне.
+ */
+function sortTemplates(templates: TemplateMeta[], sort?: string): TemplateMeta[] {
+  if (sort === "new") {
+    return [...templates].sort((a, b) => b.id - a.id);
+  }
+  if (sort === "popular") {
+    return [...templates].sort(
+      (a, b) =>
+        b.categoryIds.length - a.categoryIds.length || b.id - a.id
+    );
+  }
+  return templates;
+}
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ sort?: string }>;
 }
 
 export async function generateMetadata({
@@ -34,8 +53,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const { slug } = await params;
+  const { sort } = await searchParams;
   const catalog = await loadCatalog();
   const category = getCategoryBySlug(catalog, slug);
 
@@ -44,13 +64,19 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   const childCategories = getChildCategories(catalog, slug);
-  const templates = getTemplatesByCategoryWithDescendants(catalog, slug);
+  const templates = sortTemplates(
+    getTemplatesByCategoryWithDescendants(catalog, slug),
+    sort
+  );
+
+  const sortTitle =
+    sort === "new" ? "Новинки" : sort === "popular" ? "Популярное" : null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Breadcrumbs catalog={catalog} activeCategorySlug={slug} />
       <h1 className="mt-4 text-center text-2xl font-semibold text-zinc-900 sm:text-3xl">
-        {category.name}
+        {sortTitle ? `${category.name} — ${sortTitle}` : category.name}
       </h1>
       <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-zinc-500">
         {templates.length} шаблонов в категории

@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CookieBanner } from "@/components/CookieBanner";
 import { CartProvider } from "@/components/CartProvider";
+import { FavoritesProvider } from "@/components/FavoritesProvider";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -47,10 +48,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-zinc-50 font-sans">
         <CartProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <CookieBanner />
+          <FavoritesProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <CookieBanner />
+          </FavoritesProvider>
         </CartProvider>
       </body>
     </html>

@@ -76,7 +76,7 @@ export function Footer() {
               </span>
             </div>
           </div>
-          <p className="mt-6 text-center text-xs text-white/70 sm:text-left">
+          <p className="mt-6 text-center text-xs text-white/70">
             Все права защищены {new Date().getFullYear()} © Event Space (Evspc.com)
           </p>
         </div>

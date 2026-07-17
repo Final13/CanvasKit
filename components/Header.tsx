@@ -12,63 +12,88 @@ import {
   User,
   ChevronDown,
   PartyPopper,
-  Cake,
+  Gift,
   Sparkles,
+  Layers,
   LogOut,
 } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
+import { useFavorites } from "@/components/FavoritesProvider";
 import { formatPrice } from "@/lib/cart";
 import { CartSidebar } from "@/components/CartSidebar";
+import { SearchBar } from "@/components/SearchBar";
 
-const birthdayMenu = {
+interface MenuItem {
+  label: string;
+  href: string;
+}
+
+interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
+
+const birthdayMenu: { title: string; href: string; groups: MenuGroup[] } = {
   title: "День рождения",
   href: "/category/birthday",
   groups: [
     {
       title: "Детям",
       items: [
+        { label: "Новинки", href: "/category/kids?sort=new" },
         { label: "Девочке", href: "/category/girl" },
         { label: "Мальчику", href: "/category/boy" },
-        { label: "Все детские", href: "/category/kids" },
+        { label: "Популярное", href: "/category/kids?sort=popular" },
+        { label: "По возрасту", href: "/category/balloons" },
       ],
     },
     {
-      title: "Взрослым",
+      title: "Женщине",
       items: [
-        { label: "Женщине", href: "/category/woman" },
-        { label: "Мужчине", href: "/category/man" },
-        { label: "Все", href: "/category/birthday" },
+        { label: "Новинки", href: "/category/woman?sort=new" },
+        { label: "Популярное", href: "/category/woman?sort=popular" },
+        { label: "По возрасту", href: "/category/woman" },
+        { label: "Все дизайны", href: "/category/woman" },
+      ],
+    },
+    {
+      title: "Мужчине",
+      items: [
+        { label: "Новинки", href: "/category/man?sort=new" },
+        { label: "Популярное", href: "/category/man?sort=popular" },
+        { label: "По возрасту", href: "/category/man" },
+        { label: "Все дизайны", href: "/category/man" },
       ],
     },
   ],
 };
 
-const anniversaryMenu = {
+const anniversaryMenu: { title: string; href: string; groups: MenuGroup[] } = {
   title: "Юбилей",
   href: "/category/anniversary",
   groups: [
     {
-      title: "По полу",
+      title: "Женщине",
       items: [
-        { label: "Женщине", href: "/category/womans" },
-        { label: "Мужчине", href: "/category/mans" },
-        { label: "Все", href: "/category/anniversary" },
+        { label: "Новинки", href: "/category/womans?sort=new" },
+        { label: "Популярное", href: "/category/womans?sort=popular" },
+        { label: "По возрасту", href: "/category/anniversary" },
+        { label: "Все дизайны", href: "/category/womans" },
       ],
     },
     {
-      title: "По возрасту",
+      title: "Мужчине",
       items: [
-        { label: "25 лет", href: "/category/anniversary-25" },
-        { label: "30 лет", href: "/category/anniversary-30" },
-        { label: "50 лет", href: "/category/anniversary-50" },
-        { label: "60 лет", href: "/category/anniversary-60" },
-        { label: "Смотреть все", href: "/category/anniversary" },
+        { label: "Новинки", href: "/category/mans?sort=new" },
+        { label: "Популярное", href: "/category/mans?sort=popular" },
+        { label: "По возрасту", href: "/category/anniversary" },
+        { label: "Все дизайны", href: "/category/mans" },
       ],
     },
   ],
 };
 
-const themesMenu = {
+const themesMenu: { title: string; href: string; items: MenuItem[] } = {
   title: "Все темы",
   href: "/category/invitations",
   items: [
@@ -78,8 +103,6 @@ const themesMenu = {
     { label: "Девичник", href: "/category/bachelorette" },
     { label: "Русский стиль", href: "/category/russian" },
     { label: "Спектакль", href: "/category/performance" },
-    { label: "Супергерои", href: "/category/superheroes" },
-    { label: "Алиса в Стране чудес", href: "/category/alice-in-wonderland" },
     { label: "Смотреть все", href: "/category/invitations" },
   ],
 };
@@ -103,10 +126,39 @@ function Dropdown({
     >
       {trigger}
       {open && (
-        <div className="absolute top-full left-0 z-40 min-w-[260px] rounded-2xl border border-zinc-100 bg-white p-4 shadow-xl">
+        <div className="absolute left-0 top-full z-40 w-max min-w-[220px] max-w-[calc(100vw-2rem)] rounded-xl border border-zinc-100 bg-white p-6 pt-5 shadow-xl">
           {children}
         </div>
       )}
+    </div>
+  );
+}
+
+function GroupsDropdownContent({ groups }: { groups: MenuGroup[] }) {
+  return (
+    <div className="flex divide-x divide-zinc-100">
+      {groups.map((group, i) => (
+        <div
+          key={group.title}
+          className={`shrink-0 ${i === 0 ? "pr-6" : "px-6"}`}
+        >
+          <p className="mb-4 text-[13px] font-bold uppercase tracking-wider text-zinc-900">
+            {group.title}
+          </p>
+          <ul className="space-y-3.5">
+            {group.items.map((item) => (
+              <li key={item.label + item.href}>
+                <Link
+                  href={item.href}
+                  className="whitespace-nowrap text-[15px] leading-none text-zinc-600 transition hover:text-zinc-900"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }
@@ -121,8 +173,10 @@ export function Header() {
   const [openMobile, setOpenMobile] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const { count, total, ready } = useCart();
+  const { count: favoritesCount } = useFavorites();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -137,11 +191,18 @@ export function Header() {
     setUser(null);
   };
 
+  const triggerClass = (key: string) =>
+    `flex items-center gap-1.5 border-b-2 px-1 pb-1.5 pt-1 text-[13px] font-semibold uppercase tracking-wider transition ${
+      openDropdown === key
+        ? "border-lime-400 text-zinc-900"
+        : "border-transparent text-zinc-800 hover:border-lime-400 hover:text-zinc-900"
+    }`;
+
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-2">
+      <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-4 sm:px-6 lg:px-8">
+          <Link href="/" className="flex shrink-0 items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-400 to-violet-500 text-white">
               <PartyPopper size={20} />
             </div>
@@ -150,42 +211,19 @@ export function Header() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav className="hidden items-end gap-5 lg:flex">
             <Dropdown
               open={openDropdown === "birthday"}
               onHover={(v) => setOpenDropdown(v ? "birthday" : null)}
               trigger={
-                <Link
-                  href={birthdayMenu.href}
-                  className="flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"
-                >
-                  <Cake size={16} className="text-fuchsia-500" />
+                <Link href={birthdayMenu.href} className={triggerClass("birthday")}>
+                  <Gift size={15} strokeWidth={2.25} />
                   {birthdayMenu.title}
-                  <ChevronDown size={14} />
+                  <ChevronDown size={13} />
                 </Link>
               }
             >
-              <div className="grid grid-cols-2 gap-4">
-                {birthdayMenu.groups.map((g) => (
-                  <div key={g.title}>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                      {g.title}
-                    </p>
-                    <ul className="space-y-1">
-                      {g.items.map((item) => (
-                        <li key={item.href}>
-                          <Link
-                            href={item.href}
-                            className="block rounded-lg px-2 py-1.5 text-sm text-zinc-700 transition hover:bg-fuchsia-50 hover:text-fuchsia-700"
-                          >
-                            {item.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
+              <GroupsDropdownContent groups={birthdayMenu.groups} />
             </Dropdown>
 
             <Dropdown
@@ -194,57 +232,34 @@ export function Header() {
               trigger={
                 <Link
                   href={anniversaryMenu.href}
-                  className="flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"
+                  className={triggerClass("anniversary")}
                 >
-                  <Sparkles size={16} className="text-violet-500" />
+                  <Sparkles size={15} strokeWidth={2.25} />
                   {anniversaryMenu.title}
-                  <ChevronDown size={14} />
+                  <ChevronDown size={13} />
                 </Link>
               }
             >
-              <div className="grid grid-cols-2 gap-4">
-                {anniversaryMenu.groups.map((g) => (
-                  <div key={g.title}>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                      {g.title}
-                    </p>
-                    <ul className="space-y-1">
-                      {g.items.map((item) => (
-                        <li key={item.href}>
-                          <Link
-                            href={item.href}
-                            className="block rounded-lg px-2 py-1.5 text-sm text-zinc-700 transition hover:bg-violet-50 hover:text-violet-700"
-                          >
-                            {item.label}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
+              <GroupsDropdownContent groups={anniversaryMenu.groups} />
             </Dropdown>
 
             <Dropdown
               open={openDropdown === "themes"}
               onHover={(v) => setOpenDropdown(v ? "themes" : null)}
               trigger={
-                <Link
-                  href={themesMenu.href}
-                  className="flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900"
-                >
-                  <Sparkles size={16} className="text-amber-500" />
+                <Link href={themesMenu.href} className={triggerClass("themes")}>
+                  <Layers size={15} strokeWidth={2.25} />
                   {themesMenu.title}
-                  <ChevronDown size={14} />
+                  <ChevronDown size={13} />
                 </Link>
               }
             >
-              <ul className="space-y-1">
+              <ul className="space-y-3.5">
                 {themesMenu.items.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="block rounded-lg px-2 py-1.5 text-sm text-zinc-700 transition hover:bg-amber-50 hover:text-amber-700"
+                      className="whitespace-nowrap text-[15px] leading-none text-zinc-600 transition hover:text-zinc-900"
                     >
                       {item.label}
                     </Link>
@@ -252,63 +267,58 @@ export function Header() {
                 ))}
               </ul>
             </Dropdown>
-          </nav>
 
-          <div className="hidden items-center gap-2 lg:flex">
-            <button
-              type="button"
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-zinc-50 hover:text-zinc-900"
-              aria-label="Поиск"
-            >
-              <Search size={20} />
-            </button>
             <Link
-              href="/"
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-zinc-50 hover:text-zinc-900"
+              href="/favorites"
+              className="relative flex items-center px-1 pb-1.5 pt-1 text-zinc-800 transition hover:text-zinc-950"
               aria-label="Избранное"
             >
-              <Heart size={20} />
+              <Heart size={19} fill="currentColor" />
+              {favoritesCount > 0 && (
+                <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-fuchsia-400 px-1 text-[10px] font-bold text-white">
+                  {favoritesCount}
+                </span>
+              )}
             </Link>
+            <button
+              type="button"
+              onClick={() => setSearchOpen((v) => !v)}
+              className="flex items-center px-1 pb-1.5 pt-1 text-zinc-800 transition hover:text-zinc-950"
+              aria-label="Поиск"
+            >
+              <Search size={19} />
+            </button>
+          </nav>
 
-            {user ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/my-account"
-                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
-                >
-                  <User size={18} />
-                  <span className="max-w-[120px] truncate">
-                    {user.name || user.email}
-                  </span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-red-50 hover:text-red-500"
-                  aria-label="Выйти"
-                >
-                  <LogOut size={18} />
-                </button>
-              </div>
-            ) : (
-              <Link
-                href="/my-account"
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-zinc-50 hover:text-zinc-900"
-                aria-label="Вход"
+          <div className="ml-auto hidden items-center gap-5 lg:flex">
+            <Link
+              href="/my-account"
+              className="flex items-center gap-1.5 border-b-2 border-lime-400 px-1 pb-1.5 pt-1 text-[13px] font-semibold uppercase tracking-wider text-zinc-800 transition hover:text-zinc-950"
+            >
+              Мой аккаунт
+              <User size={16} />
+            </Link>
+            {user && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center text-zinc-400 transition hover:text-red-500"
+                aria-label="Выйти"
+                title="Выйти"
               >
-                <User size={20} />
-              </Link>
+                <LogOut size={17} />
+              </button>
             )}
 
             <button
               type="button"
               onClick={() => setCartOpen(true)}
-              className="flex items-center gap-2 rounded-xl bg-lime-200 px-4 py-2 text-sm font-semibold text-lime-900 transition hover:bg-lime-300"
+              className="relative flex items-center gap-2 rounded-lg bg-lime-300 px-4 py-2.5 text-sm font-bold text-zinc-900 transition hover:bg-lime-400"
             >
-              <ShoppingCart size={18} />
               <span>{ready ? formatPrice(total) : "0 ₽"}</span>
+              <ShoppingCart size={18} />
               {ready && count > 0 && (
-                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-xs font-bold text-lime-900">
+                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-fuchsia-400 text-[11px] font-bold text-white">
                   {count}
                 </span>
               )}
@@ -317,7 +327,7 @@ export function Header() {
 
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-zinc-600 lg:hidden"
+            className="ml-auto flex h-10 w-10 items-center justify-center rounded-xl text-zinc-600 lg:hidden"
             onClick={() => setOpenMobile(!openMobile)}
             aria-label="Меню"
           >
@@ -325,8 +335,29 @@ export function Header() {
           </button>
         </div>
 
+        {searchOpen && (
+          <div className="border-t border-zinc-100 bg-white px-4 py-3 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-xl">
+              <SearchBar autoFocus onNavigate={() => setSearchOpen(false)} />
+            </div>
+          </div>
+        )}
+
         {openMobile && (
           <div className="border-t border-zinc-100 bg-white px-4 py-4 lg:hidden">
+            <div className="mb-4">
+              <SearchBar onNavigate={() => setOpenMobile(false)} />
+            </div>
+            <div className="mb-4 flex items-center justify-between">
+              <Link
+                href="/favorites"
+                className="flex items-center gap-2 text-sm font-medium text-zinc-700"
+                onClick={() => setOpenMobile(false)}
+              >
+                <Heart size={18} />
+                Избранное{favoritesCount > 0 ? ` (${favoritesCount})` : ""}
+              </Link>
+            </div>
             <div className="mb-4 flex items-center justify-between">
               {user ? (
                 <Link
@@ -349,7 +380,7 @@ export function Header() {
               )}
               <button
                 onClick={() => setCartOpen(true)}
-                className="flex items-center gap-2 rounded-xl bg-lime-200 px-3 py-1.5 text-sm font-semibold text-lime-900"
+                className="flex items-center gap-2 rounded-lg bg-lime-300 px-3 py-1.5 text-sm font-bold text-zinc-900"
               >
                 <ShoppingCart size={16} />
                 {ready ? formatPrice(total) : "0 ₽"}
@@ -362,7 +393,7 @@ export function Header() {
               </p>
               {birthdayMenu.groups.flatMap((g) => g.items).map((item) => (
                 <Link
-                  key={item.href}
+                  key={item.label + item.href}
                   href={item.href}
                   className="block rounded-lg px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
                   onClick={() => setOpenMobile(false)}
@@ -375,7 +406,7 @@ export function Header() {
               </p>
               {anniversaryMenu.groups.flatMap((g) => g.items).map((item) => (
                 <Link
-                  key={item.href}
+                  key={item.label + item.href}
                   href={item.href}
                   className="block rounded-lg px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
                   onClick={() => setOpenMobile(false)}

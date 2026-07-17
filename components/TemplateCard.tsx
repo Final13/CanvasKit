@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { TemplateMeta } from "@/lib/templates";
+import { FavoriteToggle } from "@/components/FavoriteToggle";
 
 interface TemplateCardProps {
   template: TemplateMeta;
@@ -9,7 +10,12 @@ interface TemplateCardProps {
 
 export function TemplateCard({ template, price = 149 }: TemplateCardProps) {
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition hover:shadow-lg">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition hover:shadow-lg">
+      <FavoriteToggle
+        slug={template.slug}
+        title={template.title}
+        preview={template.preview}
+      />
       <Link
         href={`/template/${template.slug}`}
         className="relative aspect-[148/210] w-full overflow-hidden bg-zinc-100"
