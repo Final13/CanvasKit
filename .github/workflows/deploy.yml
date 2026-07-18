@@ -44,8 +44,12 @@ jobs:
             mkdir -p /var/www/evspc/data/www/evspc.com
             cd /var/www/evspc/data/www/evspc.com
 
+            # Single rolling backup of the current build (project is heavy — keep only one)
+            rm -rf .next_bak
+            [ -d .next ] && mv .next .next_bak
+
             # Remove old source files, keep node_modules for faster installs
-            find . -mindepth 1 -maxdepth 1 ! -name 'node_modules' -exec rm -rf {} + 2>/dev/null
+            find . -mindepth 1 -maxdepth 1 ! -name 'node_modules' ! -name '.next_bak' -exec rm -rf {} + 2>/dev/null
 
             tar -xzf /tmp/deploy.tar.gz
             rm -f /tmp/deploy.tar.gz
@@ -55,6 +59,14 @@ jobs:
             EOF
 
             npm install
-            npm run build
+
+            if npm run build; then
+              rm -rf .next_bak
+            else
+              # Build failed — restore the previous build so the site keeps working
+              rm -rf .next
+              [ -d .next_bak ] && mv .next_bak .next
+              exit 1
+            fi
 
             pm2 startOrReload ecosystem.config.js --update-env
