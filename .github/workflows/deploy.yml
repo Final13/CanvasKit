@@ -12,6 +12,7 @@ jobs:
 
       - name: Create archive
         run: |
+          printf '%s\n' "${{ secrets.ENV_FILE }}" > deploy.env
           tar -czf /tmp/deploy.tar.gz \
             --exclude=node_modules \
             --exclude=.git \
@@ -54,9 +55,7 @@ jobs:
             tar -xzf /tmp/deploy.tar.gz
             rm -f /tmp/deploy.tar.gz
 
-            cat > .env << 'EOF'
-            ${{ secrets.ENV_FILE }}
-            EOF
+            mv deploy.env .env
 
             npm install
 
