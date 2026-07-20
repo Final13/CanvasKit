@@ -83,7 +83,7 @@ export function CartSidebar({ open, onClose }: CartSidebarProps) {
 
         <div className="border-t border-zinc-100 p-6">
           <div className="mb-4 flex items-center justify-between text-lg font-semibold">
-            <span>Подытог:</span>
+            <span>Итого к оплате:</span>
             <span>{formatPrice(total)}</span>
           </div>
           <div className="space-y-2">

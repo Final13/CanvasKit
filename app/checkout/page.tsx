@@ -291,7 +291,7 @@ export default function CheckoutPage() {
 
             <div className="mt-4 hidden border-b border-zinc-100 pb-2 text-sm font-semibold uppercase tracking-wider text-zinc-500 sm:grid sm:grid-cols-2">
               <span>Товар</span>
-              <span className="text-right">Подытог</span>
+              <span className="text-right">Итого к оплате</span>
             </div>
 
             <ul className="divide-y divide-zinc-100">
