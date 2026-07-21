@@ -98,7 +98,7 @@ export default function CartPage() {
                 <div className="col-span-12 flex items-center gap-4 sm:col-span-7">
                   <button
                     onClick={() => removeItem(item.id)}
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-zinc-200 text-zinc-400 transition hover:border-red-300 hover:text-red-500"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-red-500 text-red-500 opacity-75 transition hover:opacity-100"
                     aria-label="Удалить"
                   >
                     <X size={14} />

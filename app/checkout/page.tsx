@@ -269,7 +269,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={loading || !canCheckout}
-              className="w-full cursor-pointer rounded-full bg-fuchsia-300 py-3.5 text-sm font-semibold text-zinc-900 transition hover:bg-fuchsia-400 disabled:opacity-60"
+              className="w-full cursor-pointer rounded-full bg-fuchsia-300 py-3.5 text-sm font-semibold text-zinc-900 transition hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400"
             >
               {loading ? "Оформление…" : "Подтвердить заказ"}
             </button>
