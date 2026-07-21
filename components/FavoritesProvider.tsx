@@ -4,7 +4,9 @@ import {
   createContext,
   useContext,
   useCallback,
+  useEffect,
   useMemo,
+  useState,
   useSyncExternalStore,
 } from "react";
 import {
@@ -42,6 +44,11 @@ export function FavoritesProvider({
     getServerSnapshot
   );
 
+  // Как и в CartProvider: до маунта снапшот пустой (getServerSnapshot),
+  // ready=true только после чтения клиентского состояния из localStorage.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
   const isFavorite = useCallback(
     (slug: string) => items.some((i) => i.slug === slug),
     [items]
@@ -59,12 +66,12 @@ export function FavoritesProvider({
     () => ({
       items,
       count: items.length,
-      ready: true,
+      ready: hydrated,
       isFavorite,
       toggle,
       remove,
     }),
-    [items, isFavorite, toggle, remove]
+    [items, hydrated, isFavorite, toggle, remove]
   );
 
   return (

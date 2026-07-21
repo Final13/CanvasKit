@@ -38,6 +38,19 @@ function statusLabel(status: OrderDetailsData["status"]) {
   }
 }
 
+function statusChipClass(status: OrderDetailsData["status"]) {
+  switch (status) {
+    case "pending":
+      return "bg-orange-200 text-orange-900";
+    case "paid":
+      return "bg-lime-200 text-lime-900";
+    case "cancelled":
+      return "bg-red-200 text-red-900";
+    default:
+      return "bg-zinc-200 text-zinc-900";
+  }
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ru-RU", {
     day: "numeric",
@@ -89,7 +102,9 @@ export function OrderDetails({ order, items }: OrderDetailsProps) {
           {formatDate(order.createdAt)}
         </span>{" "}
         и находится в статусе{" "}
-        <span className="rounded bg-lime-200 px-1.5 py-0.5 font-semibold text-lime-900">
+        <span
+          className={`rounded px-1.5 py-0.5 font-semibold ${statusChipClass(order.status)}`}
+        >
           {statusLabel(order.status)}
         </span>
         .

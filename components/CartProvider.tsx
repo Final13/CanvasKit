@@ -4,7 +4,9 @@ import {
   createContext,
   useContext,
   useCallback,
+  useEffect,
   useMemo,
+  useState,
   useSyncExternalStore,
 } from "react";
 import {
@@ -40,6 +42,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     getServerSnapshot
   );
 
+  // Во время SSR и гидрации снапшот пустой (см. getServerSnapshot) — корзина
+  // ещё не прочитана из localStorage. ready=true только после маунта, когда
+  // useSyncExternalStore уже перечитал клиентский снапшот.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
   const addItem = useCallback((item: Omit<CartItem, "id">) => {
     addCartItem(item);
   }, []);
@@ -57,12 +65,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       items,
       count: items.length,
       total: items.reduce((sum, i) => sum + i.price, 0),
-      ready: true,
+      ready: hydrated,
       addItem,
       removeItem,
       clearCart,
     }),
-    [items, addItem, removeItem, clearCart]
+    [items, hydrated, addItem, removeItem, clearCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
