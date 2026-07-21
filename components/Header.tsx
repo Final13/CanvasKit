@@ -215,7 +215,7 @@ export function Header() {
             />
           </Link>
 
-          <nav className="hidden items-end gap-5 lg:flex">
+          <nav className="hidden items-center gap-5 lg:flex">
             <Dropdown
               open={openDropdown === "birthday"}
               onHover={(v) => setOpenDropdown(v ? "birthday" : null)}
