@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Menu,
@@ -11,7 +12,6 @@ import {
   ShoppingCart,
   User,
   ChevronDown,
-  PartyPopper,
   Gift,
   Sparkles,
   Layers,
@@ -202,13 +202,17 @@ export function Header() {
     <>
       <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white">
         <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex shrink-0 items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-400 to-violet-500 text-white">
-              <PartyPopper size={20} />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-zinc-900">
-              Event Space
+          <Link href="/" className="flex shrink-0 items-center gap-1.5">
+            <span className="text-[26px] leading-none" role="img" aria-label="EvSpace">
+              🥳
             </span>
+            <Image
+              src="/images/logo.svg"
+              alt="EvSpace"
+              width={101}
+              height={30}
+              priority
+            />
           </Link>
 
           <nav className="hidden items-end gap-5 lg:flex">

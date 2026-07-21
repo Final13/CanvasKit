@@ -1,6 +1,6 @@
 "use client";
 
-import { Undo2, Redo2, QrCode, Save } from "lucide-react";
+import { Undo2, Redo2, RotateCcw, QrCode, Save } from "lucide-react";
 
 interface ToolbarProps {
   canUndo: boolean;
@@ -28,9 +28,10 @@ export function Toolbar({
     <div className="flex w-full items-center gap-1 bg-black px-4 py-3 sm:gap-2">
       <button
         onClick={onReset}
-        className="mr-auto cursor-pointer rounded-xl px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+        className="mr-auto flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
       >
-        Заново
+        <RotateCcw size={18} />
+        Сбросить
       </button>
       <button className={btn} onClick={onUndo} disabled={!canUndo} title="Назад">
         <Undo2 size={20} />

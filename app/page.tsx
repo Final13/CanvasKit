@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { loadCatalog } from "@/lib/templates";
+import { loadCatalog, getTemplatesByCategory } from "@/lib/templates";
 import { HeroSection } from "@/components/HeroSection";
-import { StepsSection } from "@/components/StepsSection";
 import { CategorySection } from "@/components/CategorySection";
 import { AgeSection } from "@/components/AgeSection";
 import { SeoTextSection } from "@/components/SeoTextSection";
@@ -16,15 +15,25 @@ export const metadata: Metadata = {
 export default async function Home() {
   const catalog = await loadCatalog();
 
-  const heroPreviews = catalog.templates
-    .filter((t) => t.preview)
-    .slice(0, 3)
-    .map((t) => t.preview!);
+  // Разнообразная выборка для карусели: по 4 шаблона из каждой аудитории,
+  // без дублей (один шаблон может входить в несколько категорий)
+  const seen = new Set<string>();
+  const carouselItems = ["girl", "boy", "woman", "man", "womans", "mans"]
+    .flatMap((slug) =>
+      getTemplatesByCategory(catalog, slug)
+        .filter((t) => t.preview)
+        .slice(0, 4)
+    )
+    .filter((t) => {
+      if (seen.has(t.slug)) return false;
+      seen.add(t.slug);
+      return true;
+    })
+    .map((t) => ({ slug: t.slug, title: t.title, preview: t.preview! }));
 
   return (
     <>
-      <HeroSection previews={heroPreviews} />
-      <StepsSection />
+      <HeroSection items={carouselItems} />
       <CategorySection
         title="Приглашения детям"
         tabs={[
