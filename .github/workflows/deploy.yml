@@ -57,6 +57,9 @@ jobs:
 
             mv deploy.env .env
 
+            # Link public assets into the web root so nginx serves them directly
+            for f in public/*; do ln -sfn "$PWD/$f" "$(basename "$f")"; done
+
             npm install
 
             if npm run build; then
