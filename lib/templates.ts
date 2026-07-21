@@ -18,6 +18,12 @@ export interface TemplateMeta {
   categoryNames: string[];
   preview: string | null;
   sourceUrl: string;
+  /** Цена в рублях (подтянута с evyt scripts/sync-evyt-meta.mjs). */
+  price?: number;
+  /** Дата публикации на evyt (ISO), для сортировки «По новизне». */
+  date?: string;
+  /** Стартовое значение счётчика популярности (сид в template_popularity). */
+  seedViews?: number;
 }
 
 export interface TemplateCatalog {

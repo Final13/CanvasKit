@@ -10,24 +10,48 @@ import {
 import { TemplateCard } from "@/components/TemplateCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CategoryBrowser } from "@/components/CategoryBrowser";
+import { SortSelect } from "@/components/SortSelect";
+import { DEFAULT_PRICE } from "@/lib/cart";
+import { getTemplateViews } from "@/lib/popularity/popularity.db";
 import type { TemplateMeta } from "@/lib/templates";
 
 /**
- * sort=new — сначала новые (по убыванию id);
- * sort=popular — по охвату категорий (прокси популярности), затем по новизне.
+ * Порядки повторяют evyt (WooCommerce):
+ *  - sort=popular   — по счётчику просмотров (template_popularity; фолбэк —
+ *    seedViews из index.json), затем по новизне;
+ *  - sort=new       — по дате публикации (убыв.), затем по id;
+ *  - sort=price-asc — по цене (возр.), при равной цене — по id (возр.);
+ *  - sort=price-desc — по цене (убыв.), при равной цене — по id (убыв.).
+ * Без параметра — как sort=new.
  */
-function sortTemplates(templates: TemplateMeta[], sort?: string): TemplateMeta[] {
-  if (sort === "new") {
-    return [...templates].sort((a, b) => b.id - a.id);
-  }
+async function sortTemplates(
+  templates: TemplateMeta[],
+  sort?: string
+): Promise<TemplateMeta[]> {
+  const byNew = (a: TemplateMeta, b: TemplateMeta) =>
+    (b.date ?? "").localeCompare(a.date ?? "") || b.id - a.id;
+
   if (sort === "popular") {
+    const views = await getTemplateViews(templates.map((t) => t.slug));
+    const popularityOf = (t: TemplateMeta) => views.get(t.slug) ?? t.seedViews ?? 0;
     return [...templates].sort(
-      (a, b) =>
-        b.categoryIds.length - a.categoryIds.length || b.id - a.id
+      (a, b) => popularityOf(b) - popularityOf(a) || byNew(a, b)
     );
   }
-  return templates;
+
+  if (sort === "price-asc" || sort === "price-desc") {
+    const priceOf = (t: TemplateMeta) => t.price ?? DEFAULT_PRICE;
+    return [...templates].sort((a, b) =>
+      sort === "price-asc"
+        ? priceOf(a) - priceOf(b) || a.id - b.id
+        : priceOf(b) - priceOf(a) || b.id - a.id
+    );
+  }
+
+  return [...templates].sort(byNew);
 }
+
+const SORT_VALUES = new Set(["popular", "new", "price-asc", "price-desc"]);
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -64,17 +88,22 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   }
 
   const childCategories = getChildCategories(catalog, slug);
-  const templates = sortTemplates(
+  const templates = await sortTemplates(
     getTemplatesByCategoryWithDescendants(catalog, slug),
     sort
   );
+
+  const currentSort = SORT_VALUES.has(sort ?? "") ? (sort as string) : "new";
 
   const sortTitle =
     sort === "new" ? "Новинки" : sort === "popular" ? "Популярное" : null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <Breadcrumbs catalog={catalog} activeCategorySlug={slug} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Breadcrumbs catalog={catalog} activeCategorySlug={slug} />
+        <SortSelect current={currentSort} />
+      </div>
       <h1 className="mt-4 text-center text-2xl font-semibold text-zinc-900 sm:text-3xl">
         {sortTitle ? `${category.name} — ${sortTitle}` : category.name}
       </h1>

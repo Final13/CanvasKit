@@ -7,6 +7,7 @@ import { loadCatalog } from "@/lib/templates";
 import { getSession } from "@/lib/auth/session";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Editor } from "@/components/Editor";
+import { TemplateViewTracker } from "@/components/TemplateViewTracker";
 
 interface TemplatePageProps {
   params: Promise<{ slug: string }>;
@@ -65,6 +66,7 @@ export default async function TemplatePage({ params }: TemplatePageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <TemplateViewTracker slug={slug} />
       <Breadcrumbs
         catalog={catalog}
         activeCategorySlug={activeCategorySlug}

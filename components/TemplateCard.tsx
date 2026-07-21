@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { TemplateMeta } from "@/lib/templates";
+import { DEFAULT_PRICE } from "@/lib/cart";
 import { FavoriteToggle } from "@/components/FavoriteToggle";
 
 interface TemplateCardProps {
@@ -8,7 +9,8 @@ interface TemplateCardProps {
   price?: number;
 }
 
-export function TemplateCard({ template, price = 149 }: TemplateCardProps) {
+export function TemplateCard({ template, price }: TemplateCardProps) {
+  const displayPrice = price ?? template.price ?? DEFAULT_PRICE;
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition hover:shadow-lg">
       <FavoriteToggle
@@ -45,7 +47,7 @@ export function TemplateCard({ template, price = 149 }: TemplateCardProps) {
           {template.title}
         </Link>
         <p className="mt-auto pt-3 text-base font-bold text-zinc-900">
-          {price} ₽
+          {displayPrice} ₽
         </p>
         <Link
           href={`/template/${template.slug}`}

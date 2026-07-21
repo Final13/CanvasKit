@@ -59,7 +59,7 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
       templateSlug: slug,
       templateTitle: template.metadata.title,
       previewUrl: `/templates/${slug}/preview.webp`,
-      price: DEFAULT_PRICE,
+      price: template.metadata.price ?? DEFAULT_PRICE,
       customizationJson,
     });
     setCartOpen(true);
@@ -163,7 +163,7 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
             <div>
               <p className="text-sm text-zinc-500">Цена за приглашение</p>
               <p className="text-2xl font-bold text-zinc-900">
-                {formatPrice(DEFAULT_PRICE)}
+                {formatPrice(template.metadata.price ?? DEFAULT_PRICE)}
               </p>
             </div>
             <button
