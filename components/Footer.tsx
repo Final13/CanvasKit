@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Script from "next/script";
+import { PaymentMethodBadges } from "./PaymentMethods";
 
 const links = [
   { label: "Условия использования", href: "/terms" },
@@ -62,19 +63,11 @@ export function Footer() {
                 </Link>
               ))}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <span className="rounded bg-white/10 px-2 py-1 text-xs font-bold">
                 ЮКАССА
               </span>
-              <span className="rounded bg-white/10 px-2 py-1 text-xs font-bold">
-                МИР
-              </span>
-              <span className="rounded bg-white/10 px-2 py-1 text-xs font-bold">
-                VISA
-              </span>
-              <span className="rounded bg-white/10 px-2 py-1 text-xs font-bold">
-                MC
-              </span>
+              <PaymentMethodBadges dark />
             </div>
           </div>
           <p className="mt-6 text-center text-xs text-white/70">

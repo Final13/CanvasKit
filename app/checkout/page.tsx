@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/CartProvider";
+import { PaymentMethodBadges } from "@/components/PaymentMethods";
 import { formatPrice } from "@/lib/cart";
 
 interface AuthUser {
@@ -250,13 +251,11 @@ export default function CheckoutPage() {
                 подтверждения заказа вы будете перенаправлены на защищённую
                 страницу оплаты.
               </p>
-              <div className="mt-4 flex items-center gap-3 rounded-xl bg-zinc-50 px-4 py-3">
+              <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-zinc-50 px-4 py-3">
                 <span className="rounded bg-white px-2 py-1 text-xs font-bold text-zinc-700 shadow-sm">
                   ЮKASSA
                 </span>
-                <span className="text-sm text-zinc-600">
-                  Банковские карты, СБП, СберБанк, Т-Банк
-                </span>
+                <PaymentMethodBadges />
               </div>
             </div>
 
