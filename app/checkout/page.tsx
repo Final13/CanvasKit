@@ -108,12 +108,6 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        if (data?.code === "EMAIL_REGISTERED") {
-          setError(
-            `${data.message} Вы можете войти, не покидая страницу: откройте меню аккаунта.`
-          );
-          return;
-        }
         throw new Error(data.error || "Не удалось оформить заказ");
       }
 
