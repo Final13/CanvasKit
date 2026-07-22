@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Menu,
   X,
@@ -179,6 +179,7 @@ export function Header() {
   const { count, total, ready } = useCart();
   const { count: favoritesCount } = useFavorites();
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -190,6 +191,8 @@ export function Header() {
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
+    router.push("/");
+    router.refresh();
   };
 
   const triggerClass = (key: string) =>
