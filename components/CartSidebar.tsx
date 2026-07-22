@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { X, Trash2 } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
@@ -13,16 +14,46 @@ interface CartSidebarProps {
 export function CartSidebar({ open, onClose }: CartSidebarProps) {
   const { items, total, removeItem } = useCart();
 
-  if (!open) return null;
+  // shouldRender держит панель в DOM, пока идёт анимация закрытия;
+  // active переключает классы перехода (выезд панели, затухание заливки).
+  const [shouldRender, setShouldRender] = useState(open);
+  const [active, setActive] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setShouldRender(true);
+      // Двойной rAF: даём браузеру применить начальное состояние,
+      // чтобы transition сработал при выставлении active.
+      let inner = 0;
+      const outer = requestAnimationFrame(() => {
+        inner = requestAnimationFrame(() => setActive(true));
+      });
+      return () => {
+        cancelAnimationFrame(outer);
+        cancelAnimationFrame(inner);
+      };
+    }
+    setActive(false);
+    const timer = setTimeout(() => setShouldRender(false), 300);
+    return () => clearTimeout(timer);
+  }, [open]);
+
+  if (!shouldRender) return null;
 
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-black/40"
+        className={`fixed inset-0 z-[60] bg-black/40 transition-opacity duration-300 ${
+          active ? "opacity-100" : "opacity-0"
+        }`}
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="fixed top-0 right-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-2xl">
+      <div
+        className={`fixed top-0 right-0 z-[70] flex h-full w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ease-out ${
+          active ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
         <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4">
           <h2 className="text-lg font-semibold text-zinc-900">Корзина</h2>
           <button
