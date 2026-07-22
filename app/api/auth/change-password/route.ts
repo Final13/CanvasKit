@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { findUserById, updateUserPassword } from "@/lib/auth/user.db";
+import { sendPasswordChangedEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,6 +45,20 @@ export async function POST(req: NextRequest) {
 
     const hashed = await hashPassword(newPassword);
     await updateUserPassword(user.id, hashed);
+
+    try {
+      const origin =
+        process.env.NEXT_PUBLIC_APP_URL ||
+        req.headers.get("origin") ||
+        req.nextUrl.origin;
+      await sendPasswordChangedEmail({
+        to: user.email,
+        name: user.name,
+        siteUrl: origin,
+      });
+    } catch (emailError) {
+      console.error("Failed to send password changed email:", emailError);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

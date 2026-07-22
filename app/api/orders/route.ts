@@ -74,26 +74,24 @@ export async function POST(req: NextRequest) {
     if (!userId && customerEmail) {
       const existing = await findUserByEmail(customerEmail);
       if (existing) {
-        return NextResponse.json(
-          {
-            error: "Email already registered",
-            code: "EMAIL_REGISTERED",
-            message:
-              "Этот email уже зарегистрирован. Войдите в аккаунт перед оформлением заказа.",
-          },
-          { status: 409 }
-        );
+        // Аккаунт уже зарегистрирован: привязываем заказ к нему по email,
+        // без ошибки и без создания сессии (вход — только по паролю).
+        userId = existing.id;
+      } else {
+        generatedPassword = generatePassword();
+        const hashed = await hashPassword(generatedPassword);
+        userId = await createUser({
+          email: customerEmail,
+          password: hashed,
+          name: customerName,
+        });
+        isNewUser = true;
+        await setSession({
+          id: userId,
+          email: customerEmail,
+          name: customerName,
+        });
       }
-
-      generatedPassword = generatePassword();
-      const hashed = await hashPassword(generatedPassword);
-      userId = await createUser({
-        email: customerEmail,
-        password: hashed,
-        name: customerName,
-      });
-      isNewUser = true;
-      await setSession({ id: userId, email: customerEmail, name: customerName });
     }
 
     if (!userId) {

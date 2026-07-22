@@ -10,23 +10,42 @@ export function AuthForms() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/my-account/orders";
 
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "reset">("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
-    const body: Record<string, string> = { email, password };
-    if (mode === "register") body.name = name;
+    setSuccess(null);
 
     try {
+      if (mode === "reset") {
+        const res = await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || "Не удалось отправить письмо");
+        }
+        setSuccess(
+          "Если аккаунт с таким email существует, мы отправили на него новый пароль."
+        );
+        return;
+      }
+
+      const endpoint =
+        mode === "login" ? "/api/auth/login" : "/api/auth/register";
+      const body: Record<string, string> = { email, password };
+      if (mode === "register") body.name = name;
+
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,7 +94,11 @@ export function AuthForms() {
       </div>
 
       <h2 className="mb-4 text-lg font-semibold uppercase tracking-wide text-zinc-900">
-        {mode === "login" ? "Вход" : "Регистрация"}
+        {mode === "login"
+          ? "Вход"
+          : mode === "register"
+          ? "Регистрация"
+          : "Восстановление пароля"}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -112,23 +135,32 @@ export function AuthForms() {
             className="mt-1 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none focus:border-fuchsia-400"
           />
         </div>
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-zinc-900"
-          >
-            Пароль <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none focus:border-fuchsia-400"
-          />
-        </div>
+        {mode !== "reset" && (
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-zinc-900"
+            >
+              Пароль <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm outline-none focus:border-fuchsia-400"
+            />
+          </div>
+        )}
+
+        {mode === "reset" && (
+          <p className="text-sm leading-relaxed text-zinc-500">
+            Укажите email, с которым вы оформляли заказ. Мы отправим на него
+            новый пароль.
+          </p>
+        )}
 
         {mode === "login" && (
           <div className="flex items-center gap-2">
@@ -149,6 +181,12 @@ export function AuthForms() {
           </div>
         )}
 
+        {success && (
+          <div className="rounded-xl bg-lime-50 p-3 text-sm text-lime-700">
+            {success}
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={loading}
@@ -159,27 +197,54 @@ export function AuthForms() {
             ? "Подождите…"
             : mode === "login"
             ? "Войти"
-            : "Зарегистрироваться"}
+            : mode === "register"
+            ? "Зарегистрироваться"
+            : "Отправить новый пароль"}
         </button>
       </form>
 
       <p className="mt-4 text-sm text-zinc-600">
-        {mode === "login" ? "Нет аккаунта? " : "Уже есть аккаунт? "}
-        <button
-          type="button"
-          onClick={() => {
-            setMode(mode === "login" ? "register" : "login");
-            setError(null);
-          }}
-          className="text-fuchsia-600 underline underline-offset-2 hover:text-fuchsia-700"
-        >
-          {mode === "login" ? "Зарегистрироваться" : "Войти"}
-        </button>
+        {mode === "reset" ? (
+          <button
+            type="button"
+            onClick={() => {
+              setMode("login");
+              setError(null);
+              setSuccess(null);
+            }}
+            className="text-fuchsia-600 underline underline-offset-2 hover:text-fuchsia-700"
+          >
+            ← Вернуться ко входу
+          </button>
+        ) : (
+          <>
+            {mode === "login" ? "Нет аккаунта? " : "Уже есть аккаунт? "}
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "login" ? "register" : "login");
+                setError(null);
+                setSuccess(null);
+              }}
+              className="text-fuchsia-600 underline underline-offset-2 hover:text-fuchsia-700"
+            >
+              {mode === "login" ? "Зарегистрироваться" : "Войти"}
+            </button>
+          </>
+        )}
       </p>
 
       {mode === "login" && (
         <p className="mt-2 text-sm text-zinc-500">
-          <button type="button" className="hover:text-zinc-700">
+          <button
+            type="button"
+            onClick={() => {
+              setMode("reset");
+              setError(null);
+              setSuccess(null);
+            }}
+            className="hover:text-zinc-700"
+          >
             Забыли свой пароль?
           </button>
         </p>
