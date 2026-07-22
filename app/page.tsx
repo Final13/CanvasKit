@@ -15,13 +15,15 @@ export const metadata: Metadata = {
 export default async function Home() {
   const catalog = await loadCatalog();
 
-  // Разнообразная выборка для карусели: по 4 шаблона из каждой аудитории,
-  // без дублей (один шаблон может входить в несколько категорий)
+  // Разнообразная выборка для карусели: по 4 самых популярных шаблона
+  // из каждой аудитории, без дублей (один шаблон может входить в несколько
+  // категорий); вся выдача — по убыванию популярности (seedViews с evyt)
   const seen = new Set<string>();
   const carouselItems = ["girl", "boy", "woman", "man", "womans", "mans"]
     .flatMap((slug) =>
       getTemplatesByCategory(catalog, slug)
         .filter((t) => t.preview)
+        .sort((a, b) => (b.seedViews ?? 0) - (a.seedViews ?? 0))
         .slice(0, 4)
     )
     .filter((t) => {
@@ -29,6 +31,7 @@ export default async function Home() {
       seen.add(t.slug);
       return true;
     })
+    .sort((a, b) => (b.seedViews ?? 0) - (a.seedViews ?? 0))
     .map((t) => ({ slug: t.slug, title: t.title, preview: t.preview! }));
 
   return (
