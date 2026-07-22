@@ -18,6 +18,11 @@ function getTransporter() {
     // На почтовом сервере хостинга самоподписанный сертификат — цепочку CA
     // не проверяем (соединение всё равно шифруется TLS).
     tls: { rejectUnauthorized: false },
+    // Таймауты обязательны: без них зависший SMTP-сервер вешает HTTP-запрос
+    // (504 Gateway Time-out на прода).
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
   });
 }
 

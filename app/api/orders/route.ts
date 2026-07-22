@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { getSession, setSession } from "@/lib/auth/session";
 import { hashPassword } from "@/lib/auth/password";
 import { createUser, findUserByEmail } from "@/lib/auth/user.db";
@@ -146,33 +146,37 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (isNewUser && customerEmail && generatedPassword) {
-      try {
-        await sendWelcomeEmail({
-          to: customerEmail,
-          name: customerName,
-          login: customerEmail,
-          password: generatedPassword,
-          siteUrl: origin,
-        });
-      } catch (emailError) {
-        console.error("Failed to send welcome email:", emailError);
+    // Письма отправляем после ответа: зависший/медленный SMTP не должен
+    // блокировать оформление заказа (иначе 504 на прода).
+    after(async () => {
+      if (isNewUser && customerEmail && generatedPassword) {
+        try {
+          await sendWelcomeEmail({
+            to: customerEmail,
+            name: customerName,
+            login: customerEmail,
+            password: generatedPassword,
+            siteUrl: origin,
+          });
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+        }
       }
-    }
 
-    if (customerEmail) {
-      try {
-        await sendOrderConfirmationEmail({
-          to: customerEmail,
-          name: customerName,
-          orderId,
-          total,
-          siteUrl: origin,
-        });
-      } catch (emailError) {
-        console.error("Failed to send order confirmation email:", emailError);
+      if (customerEmail) {
+        try {
+          await sendOrderConfirmationEmail({
+            to: customerEmail,
+            name: customerName,
+            orderId,
+            total,
+            siteUrl: origin,
+          });
+        } catch (emailError) {
+          console.error("Failed to send order confirmation email:", emailError);
+        }
       }
-    }
+    });
 
     return NextResponse.json({
       success: true,

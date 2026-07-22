@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import crypto from "crypto";
 import { getSession, setSession } from "@/lib/auth/session";
 import { hashPassword } from "@/lib/auth/password";
@@ -68,20 +68,23 @@ export async function POST(req: NextRequest) {
     });
 
     if (isNewUser && email && generatedPassword) {
-      try {
-        const origin =
-          process.env.NEXT_PUBLIC_APP_URL ||
-          req.headers.get("origin") ||
-          req.nextUrl.origin;
-        await sendWelcomeEmail({
-          to: email,
-          login: email,
-          password: generatedPassword,
-          siteUrl: origin,
-        });
-      } catch (emailError) {
-        console.error("Failed to send welcome email:", emailError);
-      }
+      const origin =
+        process.env.NEXT_PUBLIC_APP_URL ||
+        req.headers.get("origin") ||
+        req.nextUrl.origin;
+      // Письмо — после ответа, чтобы SMTP не блокировал сохранение дизайна.
+      after(async () => {
+        try {
+          await sendWelcomeEmail({
+            to: email,
+            login: email,
+            password: generatedPassword,
+            siteUrl: origin,
+          });
+        } catch (emailError) {
+          console.error("Failed to send welcome email:", emailError);
+        }
+      });
     }
 
     return NextResponse.json({ success: true, designId, isNewUser });
