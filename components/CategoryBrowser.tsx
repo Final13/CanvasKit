@@ -30,7 +30,7 @@ export function CategoryBrowser({ catalog, parentSlug }: CategoryBrowserProps) {
 
   return (
     <div className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm sm:p-6">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {childCategories.map((cat) => {
           const preview = getCategoryPreview(cat.slug);
           return (
@@ -46,7 +46,7 @@ export function CategoryBrowser({ catalog, parentSlug }: CategoryBrowserProps) {
                     alt={cat.name}
                     fill
                     className="object-cover transition group-hover:scale-105"
-                    sizes="(max-width: 640px) 50vw, 20vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">

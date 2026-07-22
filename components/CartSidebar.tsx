@@ -67,7 +67,16 @@ export function CartSidebar({ open, onClose }: CartSidebarProps) {
 
         <div className="flex-1 overflow-y-auto p-6">
           {items.length === 0 ? (
-            <p className="text-center text-zinc-500">Корзина пуста</p>
+            <div className="flex h-full flex-col items-center justify-center gap-4">
+              <p className="text-center text-zinc-500">Корзина пуста</p>
+              <Link
+                href="/category/invitations"
+                onClick={onClose}
+                className="rounded-xl bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-500"
+              >
+                Открыть каталог
+              </Link>
+            </div>
           ) : (
             <ul className="space-y-4">
               {items.map((item) => (
@@ -112,7 +121,8 @@ export function CartSidebar({ open, onClose }: CartSidebarProps) {
           )}
         </div>
 
-        <div className="border-t border-zinc-100 p-6">
+        {items.length > 0 && (
+          <div className="border-t border-zinc-100 p-6">
           <div className="mb-4 flex items-center justify-between text-lg font-semibold">
             <span>Итого к оплате:</span>
             <span>{formatPrice(total)}</span>
@@ -133,7 +143,8 @@ export function CartSidebar({ open, onClose }: CartSidebarProps) {
               Оформление заказа
             </Link>
           </div>
-        </div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -28,7 +28,7 @@ export function TemplateCard({ template, price }: TemplateCardProps) {
             alt={template.title}
             fill
             className="object-cover transition duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">

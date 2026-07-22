@@ -118,7 +118,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       )}
 
       {templates.length > 0 ? (
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {templates.map((t) => (
             <TemplateCard key={t.slug} template={t} />
           ))}
