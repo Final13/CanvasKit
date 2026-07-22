@@ -2,7 +2,9 @@ import nodemailer from "nodemailer";
 
 function getTransporter() {
   const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? "587");
+  // Дефолт 465: почтовый сервер проекта работает по SSL на 465;
+  // если SMTP_PORT не задан, не должны молча уходить на 587.
+  const port = Number(process.env.SMTP_PORT ?? "465");
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
