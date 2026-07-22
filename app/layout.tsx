@@ -31,6 +31,12 @@ export const metadata: Metadata = {
       follow: false,
     },
   },
+  // Фавикон лежит в public/ как физический файл: на проде nginx отдаёт
+  // статику напрямую с диска и не проксирует .svg в Next, поэтому
+  // app/icon.svg (виртуальный роут) на проде отдавал 404.
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
   verification: {
     google: "K9V4vijcNbhSHK8ummHa1QBm2WsT3_JKcGzh46yIu-8",
     yandex: "376d5c9b14aa9951",
