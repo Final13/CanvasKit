@@ -22,7 +22,7 @@ import { useFavorites } from "@/components/FavoritesProvider";
 import { formatPrice } from "@/lib/cart";
 import { CartSidebar } from "@/components/CartSidebar";
 import { SearchBar } from "@/components/SearchBar";
-import { PartyEmoji } from "@/components/PartyEmoji";
+import { LogoSticker } from "@/components/LogoSticker";
 
 interface MenuItem {
   label: string;
@@ -207,7 +207,7 @@ export function Header() {
       <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white">
         <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex shrink-0 items-center gap-1.5">
-            <PartyEmoji />
+            <LogoSticker />
             <Image
               src="/images/logo.svg"
               alt="EvSpace"

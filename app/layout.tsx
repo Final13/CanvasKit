@@ -17,6 +17,9 @@ const marckScript = Marck_Script({
   variable: "--font-marck",
   subsets: ["latin", "cyrillic"],
   weight: ["400"],
+  // Используется только в редакторе (канва), на первом экране не нужен —
+  // иначе браузер ругается на preload без использования.
+  preload: false,
 });
 
 export const metadata: Metadata = {
