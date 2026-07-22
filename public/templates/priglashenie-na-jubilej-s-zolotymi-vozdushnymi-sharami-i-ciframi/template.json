@@ -52,7 +52,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/birthday-2206-4.jpg",
+      "src": "/tpl-assets/2024/10/birthday-2206-4.webp",
       "left": 874,
       "top": 1241.043659043659,
       "scaleX": 1.0020790020790018,
@@ -228,7 +228,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/number-0-gold.png",
+      "src": "/tpl-assets/2024/10/number-0-gold.webp",
       "left": 1043.8543462880377,
       "top": 457.8999273508834,
       "scaleX": 0.7327139899315126,
@@ -248,7 +248,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/number-3-gold.png",
+      "src": "/tpl-assets/2024/10/number-3-gold.webp",
       "left": 686.772089124069,
       "top": 457.97198420496176,
       "scaleX": 0.7244709575691404,

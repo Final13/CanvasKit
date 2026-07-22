@@ -53,7 +53,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/birthday-2206-3.jpg",
+      "src": "/tpl-assets/2024/10/birthday-2206-3.webp",
       "left": 874,
       "top": 1241.043659043659,
       "scaleX": 1.0020790020790018,
@@ -229,7 +229,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/number-0-pink.png",
+      "src": "/tpl-assets/2024/10/number-0-pink.webp",
       "left": 1003.0790779887652,
       "top": 438.43796296132905,
       "scaleX": 0.900847655357759,
@@ -249,7 +249,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/number-3-pink.png",
+      "src": "/tpl-assets/2024/10/number-3-pink.webp",
       "left": 640.915645872868,
       "top": 438.43796296132905,
       "scaleX": 0.9269844343970982,

@@ -381,11 +381,11 @@ export function useFabric(
       const getDigitSrc = (value: string): string[] => {
         const candidates: string[] = [];
         if (effectiveColor && effectiveColor !== "default") {
-          candidates.push(`/tpl-assets/2024/10/number-${value}-${effectiveColor}.png`);
+          candidates.push(`/tpl-assets/2024/10/number-${value}-${effectiveColor}.webp`);
         }
-        candidates.push(`/tpl-assets/2024/10/number-${value}.png`);
+        candidates.push(`/tpl-assets/2024/10/number-${value}.webp`);
         if (value === "7") {
-          candidates.push(`/tpl-assets/2024/10/number-7-gold.png`);
+          candidates.push(`/tpl-assets/2024/10/number-7-gold.webp`);
         }
         return candidates;
       };

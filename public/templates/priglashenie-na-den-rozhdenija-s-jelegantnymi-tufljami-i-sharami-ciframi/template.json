@@ -49,7 +49,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/anniversary-design-2810-4.jpg",
+      "src": "/tpl-assets/2024/10/anniversary-design-2810-4.webp",
       "left": 874,
       "top": 1241.043659043659,
       "scaleX": 1.0041580041580043,
@@ -225,7 +225,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/number-0.png",
+      "src": "/tpl-assets/2024/10/number-0.webp",
       "left": 1039.5092495494564,
       "top": 555.9960624034117,
       "scaleX": 0.9973564889214529,
@@ -245,7 +245,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/number-5.png",
+      "src": "/tpl-assets/2024/10/number-5.webp",
       "left": 655.5725833771697,
       "top": 555.901665883402,
       "scaleX": 0.9841423304849513,

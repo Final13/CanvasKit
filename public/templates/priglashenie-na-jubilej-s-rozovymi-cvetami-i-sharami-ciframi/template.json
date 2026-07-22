@@ -49,7 +49,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/birthday-2206-27.jpg",
+      "src": "/tpl-assets/2024/10/birthday-2206-27.webp",
       "left": 874,
       "top": 1241.043659043659,
       "scaleX": 1.0020790020790018,
@@ -225,7 +225,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/number-5.png",
+      "src": "/tpl-assets/2024/10/number-5.webp",
       "left": 1222.654017761953,
       "top": 505.13929313929316,
       "scaleX": 0.9555590449683737,
@@ -245,7 +245,7 @@
     {
       "type": "image",
       "version": "5.3.0",
-      "src": "/tpl-assets/2024/10/number-2.png",
+      "src": "/tpl-assets/2024/10/number-2.webp",
       "left": 865.6643546098362,
       "top": 505.4178596862973,
       "scaleX": 0.9581650907108837,

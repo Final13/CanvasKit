@@ -11,7 +11,7 @@ export function HeroSection({ items }: HeroSectionProps) {
     <section
       className="relative w-full overflow-hidden"
       style={{
-        backgroundImage: "url(/images/hero-bg.png)",
+        backgroundImage: "url(/images/hero-bg.webp)",
         backgroundSize: "100% 100%",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
