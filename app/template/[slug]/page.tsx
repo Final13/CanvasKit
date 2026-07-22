@@ -70,6 +70,8 @@ export default async function TemplatePage({ params }: TemplatePageProps) {
       <Breadcrumbs
         catalog={catalog}
         activeCategorySlug={activeCategorySlug}
+        variant="compact"
+        linkLast
       />
       <h1 className="mt-4 text-center text-xl font-semibold text-zinc-900 sm:text-2xl">
         {template.metadata.title}
