@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Анимированная party-эмодзи в логотипе (Lottie, источник — LottieFiles).
+ * Анимированная party-эмодзи в логотипе (Lottie, 512×512, 60fps, 180 кадров).
  *
  * Производительность:
- * - при первой отрисовке показывается статичный кадр logo.png — ничего не
- *   блокирует first contentful paint;
+ * - при первой отрисовке показывается статичный кадр logo.png (нулевой кадр
+ *   анимации, поэтому подмена незаметна) — ничего не блокирует first contentful paint;
  * - плеер (lottie-light, SVG-only) и party.json загружаются только после
  *   события window.load (динамический import — отдельный чанк, в основной
  *   бандл не попадает);
@@ -39,11 +39,6 @@ export function LogoSticker() {
           autoplay: true,
           animationData: data,
         });
-        // Исходный холст 1920×1080, эмодзи в центре (~500×730) —
-        // кропаем квадрат вокруг него, иначе в маленьком размере будет крошечным.
-        const svg = containerRef.current.querySelector("svg");
-        svg?.setAttribute("viewBox", "572 168 780 780");
-        svg?.setAttribute("preserveAspectRatio", "xMidYMid meet");
         setPlaying(true);
       } catch (error) {
         console.error("Logo sticker failed to load:", error);
