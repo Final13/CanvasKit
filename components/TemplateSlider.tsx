@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { TemplateCard } from "./TemplateCard";
 import type { TemplateMeta } from "@/lib/templates";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { TemplateCard } from "./TemplateCard";
 
 interface TemplateSliderProps {
   templates: TemplateMeta[];

@@ -5,7 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/components/CartProvider";
-import { PaymentMethodBadges } from "@/components/PaymentMethods";
+import {
+  PAYMENT_METHODS,
+  DEFAULT_PAYMENT_METHOD,
+  type PaymentMethodType,
+} from "@/components/PaymentMethods";
 import { formatPrice } from "@/lib/cart";
 
 interface AuthUser {
@@ -27,21 +31,15 @@ function Stepper({ active }: { active: 1 | 2 | 3 }) {
         <div key={step.num} className="flex items-center gap-2">
           <span
             className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
-              active >= step.num
-                ? "bg-fuchsia-400 text-white"
-                : "bg-zinc-100 text-zinc-400"
+              active >= step.num ? "bg-fuchsia-400 text-white" : "bg-zinc-100 text-zinc-400"
             }`}
           >
             {step.num}
           </span>
-          <span
-            className={active >= step.num ? "text-zinc-900" : "text-zinc-400"}
-          >
+          <span className={active >= step.num ? "text-zinc-900" : "text-zinc-400"}>
             {step.label}
           </span>
-          {index < steps.length - 1 && (
-            <span className="mx-1 text-zinc-300">&gt;</span>
-          )}
+          {index < steps.length - 1 && <span className="mx-1 text-zinc-300">&gt;</span>}
         </div>
       ))}
     </div>
@@ -57,6 +55,7 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>(DEFAULT_PAYMENT_METHOD);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -102,6 +101,7 @@ export default function CheckoutPage() {
           })),
           customerName: name,
           customerEmail: email,
+          paymentMethodType: paymentMethod,
         }),
       });
 
@@ -119,9 +119,7 @@ export default function CheckoutPage() {
         router.push(`/checkout/success?orderId=${data.orderId}`);
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Произошла ошибка. Попробуйте ещё раз."
-      );
+      setError(err instanceof Error ? err.message : "Произошла ошибка. Попробуйте ещё раз.");
     } finally {
       setLoading(false);
     }
@@ -139,9 +137,7 @@ export default function CheckoutPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Stepper active={2} />
 
-      <h1 className="mb-8 text-center text-2xl font-semibold text-zinc-900">
-        Оформление заказа
-      </h1>
+      <h1 className="mb-8 text-center text-2xl font-semibold text-zinc-900">Оформление заказа</h1>
 
       <div className="grid gap-8 lg:grid-cols-12">
         <div className="lg:col-span-7">
@@ -187,19 +183,14 @@ export default function CheckoutPage() {
               <div className="mt-6 space-y-4">
                 {user?.name ? (
                   <div>
-                    <label className="block text-sm font-medium text-zinc-900">
-                      Имя
-                    </label>
+                    <label className="block text-sm font-medium text-zinc-900">Имя</label>
                     <div className="mt-1 rounded-xl border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
                       {user.name}
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium text-zinc-900"
-                    >
+                    <label htmlFor="name" className="block text-sm font-medium text-zinc-900">
                       Имя <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -216,10 +207,7 @@ export default function CheckoutPage() {
 
                 {user ? null : (
                   <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-zinc-900"
-                    >
+                    <label htmlFor="email" className="block text-sm font-medium text-zinc-900">
                       Email <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -241,23 +229,28 @@ export default function CheckoutPage() {
                 Способ оплаты
               </h2>
               <p className="mt-2 text-sm text-zinc-500">
-                Оплата производится через платёжный сервис ЮKassa. После
-                подтверждения заказа вы будете перенаправлены на защищённую
-                страницу оплаты.
+                Оплата производится через платёжный сервис ЮKassa. После подтверждения заказа вы
+                будете перенаправлены на защищённую страницу оплаты.
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-zinc-50 px-4 py-3">
-                <span className="rounded bg-white px-2 py-1 text-xs font-bold text-zinc-700 shadow-sm">
-                  ЮKASSA
-                </span>
-                <PaymentMethodBadges />
+                {PAYMENT_METHODS.map(({ label, type }) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setPaymentMethod(type)}
+                    className={`rounded px-2 py-1 text-xs font-bold transition ${
+                      paymentMethod === type
+                        ? "bg-fuchsia-400 text-white shadow-sm"
+                        : "bg-white text-zinc-700 shadow-sm hover:bg-fuchsia-50"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {error && (
-              <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
-                {error}
-              </div>
-            )}
+            {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>}
 
             <button
               type="submit"
@@ -268,10 +261,9 @@ export default function CheckoutPage() {
             </button>
 
             <p className="text-xs leading-relaxed text-zinc-500">
-              Оформляя заказ, вы подтверждаете, что ознакомились и согласны с
-              условиями Лицензионного договора (Оферты), даёте согласие на
-              обработку персональных данных в соответствии с Политикой в
-              отношении обработки персональных данных.
+              Оформляя заказ, вы подтверждаете, что ознакомились и согласны с условиями
+              Лицензионного договора (Оферты), даёте согласие на обработку персональных данных в
+              соответствии с Политикой в отношении обработки персональных данных.
             </p>
           </form>
         </div>
@@ -317,9 +309,7 @@ export default function CheckoutPage() {
 
             <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-4">
               <span className="font-semibold text-zinc-900">Итого</span>
-              <span className="text-lg font-semibold text-zinc-900">
-                {totalLabel}
-              </span>
+              <span className="text-lg font-semibold text-zinc-900">{totalLabel}</span>
             </div>
           </div>
         </div>

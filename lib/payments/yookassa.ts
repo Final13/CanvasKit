@@ -10,9 +10,7 @@ export function isYookassaTestMode(): boolean {
 
 function getConfig() {
   const testMode = isYookassaTestMode();
-  const shopId = testMode
-    ? process.env.YOOKASSA_TEST_SHOP_ID
-    : process.env.YOOKASSA_SHOP_ID;
+  const shopId = testMode ? process.env.YOOKASSA_TEST_SHOP_ID : process.env.YOOKASSA_SHOP_ID;
   const secretKey = testMode
     ? process.env.YOOKASSA_TEST_SECRET_KEY
     : process.env.YOOKASSA_SECRET_KEY;
@@ -30,7 +28,7 @@ function getCheckout(): YooCheckout | null {
     console.warn(
       testMode
         ? "YooKassa test mode: set YOOKASSA_TEST_SHOP_ID / YOOKASSA_TEST_SECRET_KEY"
-        : "YooKassa is not configured"
+        : "YooKassa is not configured",
     );
     return null;
   }
@@ -48,10 +46,7 @@ export interface CreatePaymentInput {
   returnUrl: string;
   customerEmail?: string;
   paymentMethodType:
-    | "bank_card"
-    | "sbp"
-    | "sberbank"
-    | "tinkoff_bank";
+    "bank_card" | "sbp" | "sberbank" | "tinkoff_bank" | "alfabank" | "yoo_money" | "cash";
 }
 
 export async function createYookassaPayment(input: CreatePaymentInput) {
@@ -107,12 +102,12 @@ export async function createYookassaPayment(input: CreatePaymentInput) {
     };
     console.error(
       "YooKassa createPayment error:",
-      axiosError.response?.data ?? axiosError.message ?? error
+      axiosError.response?.data ?? axiosError.message ?? error,
     );
     throw new Error(
       axiosError.response?.data?.description ||
         axiosError.message ||
-        "Ошибка при создании платежа в ЮKassa"
+        "Ошибка при создании платежа в ЮKassa",
     );
   }
 }

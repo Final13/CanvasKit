@@ -3,10 +3,7 @@ import { getSession, setSession } from "@/lib/auth/session";
 import { hashPassword } from "@/lib/auth/password";
 import { createUser, findUserByEmail } from "@/lib/auth/user.db";
 import { createOrder } from "@/lib/orders/order.db";
-import {
-  createYookassaPayment,
-  isYookassaConfigured,
-} from "@/lib/payments/yookassa";
+import { createYookassaPayment, isYookassaConfigured } from "@/lib/payments/yookassa";
 import { createYookassaPaymentRecord } from "@/lib/payments/yookassa.db";
 import { sendWelcomeEmail, sendOrderConfirmationEmail } from "@/lib/email";
 import { DEFAULT_PRICE } from "@/lib/cart";
@@ -41,17 +38,11 @@ export async function POST(req: NextRequest) {
       customerName?: string;
       customerEmail?: string;
       paymentMethodType?:
-        | "bank_card"
-        | "sbp"
-        | "sberbank"
-        | "tinkoff_bank";
+        "bank_card" | "sbp" | "sberbank" | "tinkoff_bank" | "alfabank" | "yoo_money" | "cash";
     } = body;
 
     if (!Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: "Cart is empty" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
     const normalizedItems = items.map((item) => ({
@@ -62,9 +53,7 @@ export async function POST(req: NextRequest) {
       customization_json: item.customizationJson ?? null,
     }));
 
-    const total = formatAmount(
-      normalizedItems.reduce((sum, item) => sum + item.price, 0)
-    );
+    const total = formatAmount(normalizedItems.reduce((sum, item) => sum + item.price, 0));
 
     const session = await getSession();
     let userId = session.userId;
@@ -95,10 +84,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
     }
 
     const orderId = crypto.randomUUID();
@@ -113,9 +99,7 @@ export async function POST(req: NextRequest) {
     });
 
     const origin =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      req.headers.get("origin") ||
-      req.nextUrl.origin;
+      process.env.NEXT_PUBLIC_APP_URL || req.headers.get("origin") || req.nextUrl.origin;
     const returnUrl = `${origin}/checkout/success?orderId=${orderId}`;
 
     let paymentUrl: string | null = null;
@@ -132,8 +116,7 @@ export async function POST(req: NextRequest) {
 
       if (payment) {
         const confirmation = payment.confirmation as
-          | { type: string; confirmation_url?: string }
-          | undefined;
+          { type: string; confirmation_url?: string } | undefined;
         paymentUrl = confirmation?.confirmation_url ?? null;
 
         await createYookassaPaymentRecord({
@@ -190,10 +173,9 @@ export async function POST(req: NextRequest) {
       "Create order error details:",
       typeof error,
       JSON.stringify(error),
-      error instanceof Error ? error.stack : "no stack"
+      error instanceof Error ? error.stack : "no stack",
     );
-    const message =
-      error instanceof Error ? error.message : "Internal server error";
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
