@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { TemplateCard } from "./TemplateCard";
+import { TemplateSlider } from "./TemplateSlider";
 import type { TemplateCatalog } from "@/lib/templates";
 
 interface Tab {
@@ -37,6 +37,7 @@ function getTemplatesForTab(catalog: TemplateCatalog, slug: string, limit: numbe
 
   return catalog.templates
     .filter((t) => t.preview && t.categorySlugs.some((s) => slugs.has(s)))
+    .sort((a, b) => (b.seedViews ?? 0) - (a.seedViews ?? 0))
     .slice(0, limit);
 }
 
@@ -45,25 +46,21 @@ export function CategorySection({
   subtitle,
   tabs,
   catalog,
-  limit = 6,
+  limit = 12,
   seeAllHref,
 }: CategorySectionProps) {
   const [activeTab, setActiveTab] = useState(tabs[0]?.slug ?? "");
 
   const templates = useMemo(
     () => getTemplatesForTab(catalog, activeTab, limit),
-    [catalog, activeTab, limit]
+    [catalog, activeTab, limit],
   );
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <h2 className="text-center text-2xl font-semibold text-zinc-900 sm:text-3xl">
-        {title}
-      </h2>
+      <h2 className="text-center text-2xl font-semibold text-zinc-900 sm:text-3xl">{title}</h2>
       {subtitle && (
-        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-zinc-500">
-          {subtitle}
-        </p>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-zinc-500">{subtitle}</p>
       )}
 
       <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -101,10 +98,8 @@ export function CategorySection({
         </div>
 
         {templates.length > 0 ? (
-          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {templates.map((t) => (
-              <TemplateCard key={t.slug} template={t} />
-            ))}
+          <div className="mt-5">
+            <TemplateSlider templates={templates} />
           </div>
         ) : (
           <p className="mt-8 text-center text-sm text-zinc-400">

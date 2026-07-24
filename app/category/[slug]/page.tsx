@@ -7,10 +7,9 @@ import {
   getCategoryPath,
   getTemplatesByCategoryWithDescendants,
 } from "@/lib/template-helpers";
-import { TemplateCard } from "@/components/TemplateCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { CategoryBrowser } from "@/components/CategoryBrowser";
-import { SortSelect } from "@/components/SortSelect";
+import { CategoryGrid } from "@/components/CategoryGrid";
 import { DEFAULT_PRICE } from "@/lib/cart";
 import { getTemplateViews } from "@/lib/popularity/popularity.db";
 import type { TemplateMeta } from "@/lib/templates";
@@ -24,19 +23,14 @@ import type { TemplateMeta } from "@/lib/templates";
  *  - sort=price-desc — по цене (убыв.), при равной цене — по id (убыв.).
  * Без параметра — как sort=new.
  */
-async function sortTemplates(
-  templates: TemplateMeta[],
-  sort?: string
-): Promise<TemplateMeta[]> {
+async function sortTemplates(templates: TemplateMeta[], sort?: string): Promise<TemplateMeta[]> {
   const byNew = (a: TemplateMeta, b: TemplateMeta) =>
     (b.date ?? "").localeCompare(a.date ?? "") || b.id - a.id;
 
   if (sort === "popular") {
     const views = await getTemplateViews(templates.map((t) => t.slug));
     const popularityOf = (t: TemplateMeta) => views.get(t.slug) ?? t.seedViews ?? 0;
-    return [...templates].sort(
-      (a, b) => popularityOf(b) - popularityOf(a) || byNew(a, b)
-    );
+    return [...templates].sort((a, b) => popularityOf(b) - popularityOf(a) || byNew(a, b));
   }
 
   if (sort === "price-asc" || sort === "price-desc") {
@@ -44,7 +38,7 @@ async function sortTemplates(
     return [...templates].sort((a, b) =>
       sort === "price-asc"
         ? priceOf(a) - priceOf(b) || a.id - b.id
-        : priceOf(b) - priceOf(a) || b.id - a.id
+        : priceOf(b) - priceOf(a) || b.id - a.id,
     );
   }
 
@@ -58,9 +52,7 @@ interface CategoryPageProps {
   searchParams: Promise<{ sort?: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
   const catalog = await loadCatalog();
   const category = getCategoryBySlug(catalog, slug);
@@ -88,22 +80,15 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   }
 
   const childCategories = getChildCategories(catalog, slug);
-  const templates = await sortTemplates(
-    getTemplatesByCategoryWithDescendants(catalog, slug),
-    sort
-  );
+  const templates = await sortTemplates(getTemplatesByCategoryWithDescendants(catalog, slug), sort);
 
   const currentSort = SORT_VALUES.has(sort ?? "") ? (sort as string) : "new";
 
-  const sortTitle =
-    sort === "new" ? "Новинки" : sort === "popular" ? "Популярное" : null;
+  const sortTitle = sort === "new" ? "Новинки" : sort === "popular" ? "Популярное" : null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Breadcrumbs catalog={catalog} activeCategorySlug={slug} />
-        <SortSelect current={currentSort} />
-      </div>
+      <Breadcrumbs catalog={catalog} activeCategorySlug={slug} />
       <h1 className="mt-4 text-center text-2xl font-semibold text-zinc-900 sm:text-3xl">
         {sortTitle ? `${category.name} — ${sortTitle}` : category.name}
       </h1>
@@ -117,17 +102,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         </div>
       )}
 
-      {templates.length > 0 ? (
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {templates.map((t) => (
-            <TemplateCard key={t.slug} template={t} />
-          ))}
-        </div>
-      ) : (
-        <p className="mt-12 text-center text-sm text-zinc-400">
-          В этой категории пока нет шаблонов.
-        </p>
-      )}
+      <CategoryGrid templates={templates} currentSort={currentSort} />
     </div>
   );
 }

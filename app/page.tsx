@@ -24,7 +24,7 @@ export default async function Home() {
       getTemplatesByCategory(catalog, slug)
         .filter((t) => t.preview)
         .sort((a, b) => (b.seedViews ?? 0) - (a.seedViews ?? 0))
-        .slice(0, 4)
+        .slice(0, 4),
     )
     .filter((t) => {
       if (seen.has(t.slug)) return false;
@@ -55,7 +55,7 @@ export default async function Home() {
         catalog={catalog}
         seeAllHref="/category/birthday"
       />
-      <AgeSection />
+      <AgeSection catalog={catalog} />
       <CategorySection
         title="Популярные темы"
         tabs={[
