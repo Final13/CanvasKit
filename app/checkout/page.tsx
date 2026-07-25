@@ -111,8 +111,6 @@ export default function CheckoutPage() {
         throw new Error(data.error || "Не удалось оформить заказ");
       }
 
-      clearCart();
-
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
       } else {

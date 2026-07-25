@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { findUserById } from "@/lib/auth/user.db";
-import { getOrdersByUserId } from "@/lib/orders/order.db";
+import { getOrdersByUserId, getPaidOrdersWithItems } from "@/lib/orders/order.db";
 import { AccountSidebar } from "@/components/account/AccountSidebar";
 import { OrdersTable } from "@/components/account/OrdersTable";
+import { PurchasedTemplates } from "@/components/account/PurchasedTemplates";
 
 export const metadata: Metadata = {
   title: "Мои заказы — Event Space",
-  description:
-    "История заказов, статусы оплаты и доступ к купленным приглашениям.",
+  description: "История заказов, статусы оплаты и доступ к купленным приглашениям.",
 };
 
 export default async function OrdersPage() {
@@ -19,9 +19,10 @@ export default async function OrdersPage() {
     redirect("/my-account?redirect=/my-account/orders");
   }
 
-  const [user, orders] = await Promise.all([
+  const [user, orders, paidOrders] = await Promise.all([
     findUserById(session.userId),
     getOrdersByUserId(session.userId),
+    getPaidOrdersWithItems(session.userId),
   ]);
 
   if (!user) {
@@ -29,18 +30,39 @@ export default async function OrdersPage() {
     redirect("/my-account");
   }
 
+  const serializedPaidOrders = paidOrders.map((order) => ({
+    id: order.id,
+    createdAt: order.createdAt.toISOString(),
+    items: order.items.map((item) => ({
+      id: item.id,
+      orderId: item.orderId,
+      templateSlug: item.templateSlug,
+      templateTitle: item.templateTitle,
+      previewUrl: item.previewUrl,
+      customizationJson: item.customizationJson,
+    })),
+  }));
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="mb-8 text-center text-2xl font-semibold text-zinc-900">
-        Заказы
-      </h1>
+      <h1 className="mb-8 text-center text-2xl font-semibold text-zinc-900">Заказы</h1>
 
       <div className="grid gap-8 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <AccountSidebar name={user.name} email={user.email} />
         </div>
-        <div className="lg:col-span-8">
-          <OrdersTable orders={orders} />
+        <div className="lg:col-span-8 space-y-8">
+          {/* Купленные шаблоны — можно скачать */}
+          <div>
+            <h2 className="mb-4 text-lg font-semibold text-zinc-900">Ваши заказы</h2>
+            <PurchasedTemplates orders={serializedPaidOrders} />
+          </div>
+
+          {/* Все заказы (включая pending) */}
+          <div>
+            <h2 className="mb-4 text-lg font-semibold text-zinc-900">История заказов</h2>
+            <OrdersTable orders={orders} />
+          </div>
         </div>
       </div>
     </div>
