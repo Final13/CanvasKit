@@ -196,7 +196,7 @@ export function Header() {
   };
 
   const triggerClass = (key: string) =>
-    `flex items-center gap-1.5 border-b-2 px-1 pb-1.5 pt-1 text-[13px] font-semibold uppercase tracking-wider transition ${
+    `flex items-center gap-1.5 border-b-2 px-1 pb-1 pt-1.5 text-[13px] font-semibold uppercase tracking-wider transition ${
       openDropdown === key
         ? "border-lime-400 text-zinc-900"
         : "border-transparent text-zinc-800 hover:border-lime-400 hover:text-zinc-900"
@@ -276,10 +276,10 @@ export function Header() {
 
             <Link
               href="/favorites"
-              className="relative flex items-center px-1 pb-1.5 pt-1 text-zinc-800 transition hover:text-zinc-950"
+              className="relative flex items-center px-1 py-1.5 text-zinc-800 transition hover:text-zinc-950"
               aria-label="Избранное"
             >
-              <Heart size={19} fill="currentColor" />
+              <Heart size={19} fill={favoritesCount > 0 ? "currentColor" : "none"} />
               {favoritesCount > 0 && (
                 <span className="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-fuchsia-400 px-1 text-[10px] font-bold text-white">
                   {favoritesCount}
@@ -289,7 +289,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => setSearchOpen((v) => !v)}
-              className="flex items-center px-1 pb-1.5 pt-1 text-zinc-800 transition hover:text-zinc-950"
+              className="flex items-center px-1 py-1.5 text-zinc-800 transition hover:text-zinc-950"
               aria-label="Поиск"
             >
               <Search size={19} />
@@ -299,7 +299,7 @@ export function Header() {
           <div className="ml-auto hidden items-center gap-5 lg:flex">
             <Link
               href="/my-account"
-              className="flex items-center gap-1.5 border-b-2 border-lime-400 px-1 pb-1.5 pt-1 text-[13px] font-semibold uppercase tracking-wider text-zinc-800 transition hover:text-zinc-950"
+              className="flex items-center gap-1.5 border-b-2 border-lime-400 px-1 pb-1 pt-1.5 text-[13px] font-semibold uppercase tracking-wider text-zinc-800 transition hover:text-zinc-950"
             >
               Мой аккаунт
               <User size={16} />
