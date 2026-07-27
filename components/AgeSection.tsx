@@ -121,14 +121,14 @@ export function AgeSection({ catalog }: AgeSectionProps) {
 
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 px-4 sm:px-6 lg:px-8 -mx-4 sm:-mx-6 lg:-mx-8"
+          className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2"
           style={{ scrollbarWidth: "none" }}
         >
           {ageTemplates.map(({ value, slug, label, template }) => (
             <Link
               key={slug}
               href={`/category/${slug}`}
-              className="flex-shrink-0 snap-start w-[180px] sm:w-[200px] lg:w-[220px] group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition hover:shadow-lg"
+              className="flex-shrink-0 snap-start w-[calc((100%_-_16px)/2)] sm:w-[calc((100%_-_32px)/3)] md:w-[calc((100%_-_48px)/4)] lg:w-[calc((100%_-_64px)/5)] group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition hover:shadow-lg"
             >
               {/* Превью шаблона */}
               <div className="relative aspect-[148/210] w-full overflow-hidden bg-zinc-100">
@@ -138,7 +138,7 @@ export function AgeSection({ catalog }: AgeSectionProps) {
                     alt={label}
                     fill
                     className="object-cover transition duration-500 group-hover:scale-105"
-                    sizes="(max-width: 640px) 180px, (max-width: 1024px) 200px, 220px"
+                    sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 230px"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">

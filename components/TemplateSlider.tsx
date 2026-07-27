@@ -93,13 +93,13 @@ export function TemplateSlider({ templates }: TemplateSliderProps) {
       {/* Контейнер со скроллом */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 px-4 sm:px-6 lg:px-8 -mx-4 sm:-mx-6 lg:-mx-8"
+        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2"
         style={{ scrollbarWidth: "none" }}
       >
         {templates.map((t) => (
           <div
             key={t.slug}
-            className="flex-shrink-0 snap-start w-[180px] sm:w-[200px] lg:w-[220px]"
+            className="flex-shrink-0 snap-start w-[calc((100%_-_16px)/2)] sm:w-[calc((100%_-_32px)/3)] md:w-[calc((100%_-_48px)/4)] lg:w-[calc((100%_-_64px)/5)]"
           >
             <TemplateCard template={t} />
           </div>
