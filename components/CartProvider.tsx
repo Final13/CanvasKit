@@ -15,6 +15,7 @@ import {
   getCartSnapshot,
   addCartItem,
   removeCartItem,
+  updateCartItem,
   clearCartItems,
   writeCartSummaryCookie,
 } from "@/lib/cart";
@@ -26,6 +27,7 @@ interface CartContextValue {
   ready: boolean;
   addItem: (item: Omit<CartItem, "id">) => void;
   removeItem: (id: string) => void;
+  updateItem: (id: string, patch: Partial<Omit<CartItem, "id">>) => void;
   clearCart: () => void;
 }
 
@@ -63,6 +65,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     removeCartItem(id);
   }, []);
 
+  const updateItem = useCallback(
+    (id: string, patch: Partial<Omit<CartItem, "id">>) => {
+      updateCartItem(id, patch);
+    },
+    []
+  );
+
   const clearCart = useCallback(() => {
     clearCartItems();
   }, []);
@@ -75,9 +84,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       ready: hydrated,
       addItem,
       removeItem,
+      updateItem,
       clearCart,
     }),
-    [items, hydrated, addItem, removeItem, clearCart]
+    [items, hydrated, addItem, removeItem, updateItem, clearCart]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

@@ -123,7 +123,7 @@ export default function CartPage() {
                       {item.templateTitle}
                     </p>
                     <Link
-                      href={`/template/${item.templateSlug}`}
+                      href={`/template/${item.templateSlug}?edit=${item.id}`}
                       className="mt-1 inline-block text-xs italic text-zinc-500 underline decoration-zinc-300 underline-offset-2 transition hover:text-fuchsia-600"
                     >
                       Нажмите здесь для повторного редактирования

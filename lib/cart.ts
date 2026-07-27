@@ -96,6 +96,16 @@ export function removeCartItem(id: string): void {
   notifyListeners();
 }
 
+export function updateCartItem(
+  id: string,
+  patch: Partial<Omit<CartItem, "id">>
+): void {
+  const next = readCart().map((i) => (i.id === id ? { ...i, ...patch } : i));
+  cachedItems = next;
+  saveCartToStorage(next);
+  notifyListeners();
+}
+
 export function clearCartItems(): void {
   cachedItems = [];
   saveCartToStorage([]);

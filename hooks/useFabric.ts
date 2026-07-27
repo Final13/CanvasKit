@@ -524,7 +524,9 @@ export function useFabric(
     if (!canvas || !fabric || !template) return;
 
     skipHistory.current = true;
-    loadTemplateIntoCanvas(canvas, fabric, template).then(() => {
+    // возвращаем promise: вызывающий (Editor.handleReset) ждёт перезагрузку
+    // canvas, чтобы зафиксировать новое базовое состояние для dirty-проверки
+    return loadTemplateIntoCanvas(canvas, fabric, template).then(() => {
       skipHistory.current = false;
     });
   }, [template, loadTemplateIntoCanvas]);

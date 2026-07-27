@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useFabric } from "@/hooks/useFabric";
 import { Toolbar } from "./Toolbar";
 import { EditorTabs, type TabKey } from "./EditorTabs";
@@ -12,7 +12,7 @@ import { UnsavedChangesModal } from "./UnsavedChangesModal";
 import type { TemplateData } from "@/lib/templates";
 import { useCart } from "@/components/CartProvider";
 import { CartSidebar } from "@/components/CartSidebar";
-import { DEFAULT_PRICE, formatPrice } from "@/lib/cart";
+import { DEFAULT_PRICE, formatPrice, getCartFromStorage } from "@/lib/cart";
 import { getDesignDraft, saveDesignDraft, clearDesignDraft } from "@/lib/design-draft";
 
 interface EditorProps {
@@ -31,10 +31,28 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
-  const { addItem } = useCart();
+  const { addItem, updateItem } = useCart();
+  const searchParams = useSearchParams();
+  // Режим редактирования товара корзины: /template/slug?edit=<cartItemId>.
+  // Канва грузится из customizationJson этого товара, а кнопка «В корзину»
+  // заменяется на «Сохранить» (обновляет товар, а не добавляет новый).
+  const editId = searchParams.get("edit");
 
   const slug = template.metadata.slug;
   const [draft] = useState(() => getDesignDraft(slug));
+  const [editJson] = useState(() => {
+    if (!editId) return null;
+    return (
+      getCartFromStorage().find((i) => i.id === editId)?.customizationJson ??
+      null
+    );
+  });
+  // База для dirty-проверки — последний ЗАХВАЧЕННЫЙ снапшот canvas:
+  // загруженный черновик, дизайн из корзины (режим edit), сохранение,
+  // сброс или добавление в корзину.
+  const savedJsonRef = useRef<string | null>(
+    editJson ?? draft?.json ?? null
+  );
 
   const {
     ready,
@@ -53,7 +71,7 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
     getCanvasJson,
     activeObject,
     updateActiveObject,
-  } = useFabric(canvasElRef, template, draft?.json ?? null);
+  } = useFabric(canvasElRef, template, editJson ?? draft?.json ?? null);
 
   const handleAddToCart = () => {
     const customizationJson = getCanvasJson();
@@ -66,12 +84,24 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
       customizationJson,
     });
     setCartOpen(true);
+    savedJsonRef.current = customizationJson;
     setHasUnsavedChanges(false);
   };
 
-  const handleReset = () => {
+  // Режим edit: сохраняем правки в тот же товар корзины и уходим в корзину
+  const handleSaveEdit = () => {
+    const customizationJson = getCanvasJson();
+    if (!customizationJson || !editId) return;
+    updateItem(editId, { customizationJson });
+    savedJsonRef.current = customizationJson;
+    setHasUnsavedChanges(false);
+    router.push("/cart");
+  };
+
+  const handleReset = async () => {
     clearDesignDraft(slug);
-    reset();
+    await reset();
+    savedJsonRef.current = getCanvasJson();
     setHasUnsavedChanges(false);
   };
 
@@ -80,6 +110,7 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
     if (!customizationJson) throw new Error("Редактор ещё загружается");
 
     saveDesignDraft(slug, name, customizationJson);
+    savedJsonRef.current = customizationJson;
 
     if (!isAuthenticated && !email) return "local";
 
@@ -102,18 +133,19 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
     return "account";
   };
 
-  // Отслеживаем изменения в canvas
+  // Отслеживаем изменения в canvas относительно последнего захваченного
+  // снапшота (savedJsonRef)
   useEffect(() => {
     if (!ready) return;
     const checkChanges = () => {
       const current = getCanvasJson();
-      if (current && current !== draft?.json) {
+      if (current && current !== savedJsonRef.current) {
         setHasUnsavedChanges(true);
       }
     };
     const interval = setInterval(checkChanges, 2000);
     return () => clearInterval(interval);
-  }, [ready, getCanvasJson, draft?.json]);
+  }, [ready, getCanvasJson]);
 
   // Блокировка навигации при несохранённых изменениях
   useEffect(() => {
@@ -123,7 +155,8 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
     const handlePopState = (e: PopStateEvent) => {
       e.preventDefault();
       // Возвращаем пользователя обратно на текущую страницу
-      window.history.pushState(null, "", pathname);
+      // (search сохраняем, иначе теряется ?edit= и режим редактирования)
+      window.history.pushState(null, "", pathname + window.location.search);
       setUnsavedModalOpen(true);
       setPendingUrl(null); // popstate — не знаем целевой URL
     };
@@ -146,7 +179,7 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
     };
 
     // Подменяем history state чтобы перехватить back
-    window.history.pushState(null, "", pathname);
+    window.history.pushState(null, "", pathname + window.location.search);
     window.addEventListener("popstate", handlePopState);
     document.addEventListener("click", handleClick, true);
 
@@ -263,12 +296,21 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
                 {formatPrice(template.metadata.price ?? DEFAULT_PRICE)}
               </p>
             </div>
-            <button
-              onClick={handleAddToCart}
-              className="cursor-pointer rounded-xl bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-500"
-            >
-              В корзину
-            </button>
+            {editId ? (
+              <button
+                onClick={handleSaveEdit}
+                className="cursor-pointer rounded-xl bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-500"
+              >
+                Сохранить
+              </button>
+            ) : (
+              <button
+                onClick={handleAddToCart}
+                className="cursor-pointer rounded-xl bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-500"
+              >
+                В корзину
+              </button>
+            )}
           </div>
           <p className="mt-3 text-xs text-zinc-500">
             Редактировать приглашение и вносить свои данные можно до оформления заказа. После оплаты
