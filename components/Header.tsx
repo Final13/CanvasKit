@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Menu,
   X,
@@ -170,23 +170,32 @@ interface AuthUser {
   name?: string | null;
 }
 
-export function Header() {
+export function Header({
+  initialUser,
+  initialCart,
+}: {
+  initialUser: AuthUser | null;
+  initialCart: { count: number; total: number } | null;
+}) {
   const [openMobile, setOpenMobile] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(initialUser);
   const { count, total, ready } = useCart();
   const { count: favoritesCount } = useFavorites();
-  const pathname = usePathname();
   const router = useRouter();
 
+  // Статус авторизации приходит с сервера (initialUser); синхронизируемся,
+  // когда layout перерендерился после login/logout (router.refresh()).
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => res.json())
-      .then((data) => setUser(data.user ?? null))
-      .catch(() => {});
-  }, [pathname]);
+    setUser(initialUser);
+  }, [initialUser]);
+
+  // До ready (localStorage ещё не прочитан) показываем серверную сводку из
+  // cookie — она совпадает с SSR-HTML, поэтому кнопка корзины не дёргается.
+  const displayTotal = ready ? total : (initialCart?.total ?? 0);
+  const displayCount = ready ? count : (initialCart?.count ?? 0);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -321,11 +330,11 @@ export function Header() {
               onClick={() => setCartOpen(true)}
               className="relative flex items-center gap-2 rounded-lg bg-lime-300 px-4 py-2.5 text-sm font-bold text-zinc-900 transition hover:bg-lime-400"
             >
-              <span>{ready ? formatPrice(total) : "0 ₽"}</span>
+              <span>{formatPrice(displayTotal)}</span>
               <ShoppingCart size={18} />
-              {ready && count > 0 && (
+              {displayCount > 0 && (
                 <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-fuchsia-400 text-[11px] font-bold text-white">
-                  {count}
+                  {displayCount}
                 </span>
               )}
             </button>
@@ -389,7 +398,7 @@ export function Header() {
                 className="flex items-center gap-2 rounded-lg bg-lime-300 px-3 py-1.5 text-sm font-bold text-zinc-900"
               >
                 <ShoppingCart size={16} />
-                {ready ? formatPrice(total) : "0 ₽"}
+                {formatPrice(displayTotal)}
               </button>
             </div>
 

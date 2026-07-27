@@ -6,6 +6,8 @@ import { Footer } from "@/components/Footer";
 import { CookieBanner } from "@/components/CookieBanner";
 import { CartProvider } from "@/components/CartProvider";
 import { FavoritesProvider } from "@/components/FavoritesProvider";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { getCartSummary } from "@/lib/cart-summary";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -46,11 +48,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Статус авторизации и сводка корзины читаются на сервере, чтобы шапка
+  // сразу рендерилась в финальном виде — без дёрганья (CLS) после гидрации.
+  const user = await getCurrentUser();
+  const cartSummary = await getCartSummary();
   return (
     <html
       lang="ru"
@@ -59,7 +65,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-zinc-50 font-sans">
         <CartProvider>
           <FavoritesProvider>
-            <Header />
+            <Header initialUser={user} initialCart={cartSummary} />
             <main className="flex-1">{children}</main>
             <Footer />
             <CookieBanner />

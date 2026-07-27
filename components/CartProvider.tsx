@@ -16,6 +16,7 @@ import {
   addCartItem,
   removeCartItem,
   clearCartItems,
+  writeCartSummaryCookie,
 } from "@/lib/cart";
 
 interface CartContextValue {
@@ -46,7 +47,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // ещё не прочитана из localStorage. ready=true только после маунта, когда
   // useSyncExternalStore уже перечитал клиентский снапшот.
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    setHydrated(true);
+    // Бэкфилл cookie-сводки: у корзин, созданных до её введения (или при
+    // расхождении localStorage и cookie), сервер не знает сумму и кнопка
+    // корзины дёргается. После этого первого визита cookie актуальна.
+    writeCartSummaryCookie(getCartSnapshot());
+  }, []);
 
   const addItem = useCallback((item: Omit<CartItem, "id">) => {
     addCartItem(item);

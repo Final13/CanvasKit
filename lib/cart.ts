@@ -30,9 +30,24 @@ export function getCartFromStorage(): CartItem[] {
   }
 }
 
+// Сводка дублируется в cookie: сервер рендерит шапку сразу с реальной
+// суммой/количеством, иначе кнопка корзины дёргается после гидрации (CLS).
+export function writeCartSummaryCookie(items: CartItem[]) {
+  if (typeof window === "undefined") return;
+  const summary = {
+    count: items.length,
+    total: items.reduce((sum, i) => sum + i.price, 0),
+  };
+  const secure = location.protocol === "https:" ? "; secure" : "";
+  document.cookie = `canvaskit_cart_summary=${encodeURIComponent(
+    JSON.stringify(summary)
+  )}; path=/; max-age=31536000; samesite=lax${secure}`;
+}
+
 export function saveCartToStorage(items: CartItem[]) {
   if (typeof window === "undefined") return;
   localStorage.setItem("canvaskit-cart", JSON.stringify(items));
+  writeCartSummaryCookie(items);
 }
 
 let cachedItems: CartItem[] | null = null;
