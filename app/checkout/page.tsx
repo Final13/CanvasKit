@@ -11,6 +11,7 @@ import {
   type PaymentMethodType,
 } from "@/components/PaymentMethods";
 import { formatPrice } from "@/lib/cart";
+import { Circle, CircleCheck } from "lucide-react";
 
 interface AuthUser {
   id: string;
@@ -230,21 +231,36 @@ export default function CheckoutPage() {
                 Оплата производится через платёжный сервис ЮKassa. После подтверждения заказа вы
                 будете перенаправлены на защищённую страницу оплаты.
               </p>
-              <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-zinc-50 px-4 py-3">
-                {PAYMENT_METHODS.map(({ label, type }) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setPaymentMethod(type)}
-                    className={`rounded px-2 py-1 text-xs font-bold transition ${
-                      paymentMethod === type
-                        ? "bg-fuchsia-400 text-white shadow-sm"
-                        : "bg-white text-zinc-700 shadow-sm hover:bg-fuchsia-50"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
+              <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2" role="radiogroup" aria-label="Способ оплаты">
+                {PAYMENT_METHODS.map(({ label, type, icon: Icon, chipClass }) => {
+                  const selected = paymentMethod === type;
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      onClick={() => setPaymentMethod(type)}
+                      className={`flex items-center gap-3 rounded-xl border p-3.5 text-left transition ${
+                        selected
+                          ? "border-fuchsia-400 bg-fuchsia-50 shadow-sm"
+                          : "border-zinc-200 bg-white hover:border-fuchsia-300 hover:bg-fuchsia-50/50"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${chipClass}`}
+                      >
+                        <Icon size={22} />
+                      </span>
+                      <span className="flex-1 text-sm font-semibold text-zinc-900">{label}</span>
+                      {selected ? (
+                        <CircleCheck size={20} className="shrink-0 text-fuchsia-500" />
+                      ) : (
+                        <Circle size={20} className="shrink-0 text-zinc-300" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

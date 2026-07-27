@@ -64,9 +64,6 @@ export function Footer() {
               ))}
             </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <span className="rounded bg-white/10 px-2 py-1 text-xs font-bold">
-                ЮКАССА
-              </span>
               <PaymentMethodBadges dark />
             </div>
           </div>
