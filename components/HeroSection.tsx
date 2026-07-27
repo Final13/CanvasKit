@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { HeroCarousel, type HeroCarouselItem } from "./HeroCarousel";
+import { getViewportWidth } from "@/lib/viewport";
 
 interface HeroSectionProps {
   items: HeroCarouselItem[];
 }
 
-export function HeroSection({ items }: HeroSectionProps) {
+export async function HeroSection({ items }: HeroSectionProps) {
+  // Ширина экрана из прошлого визита — SSR-перспектива карусели под неё,
+  // после гидрации слайды не дёргаются.
+  const viewportWidth = await getViewportWidth();
   return (
     <section
       className="relative w-full overflow-hidden"
@@ -34,7 +38,7 @@ export function HeroSection({ items }: HeroSectionProps) {
       </div>
 
       <div className="mt-0">
-        <HeroCarousel items={items} />
+        <HeroCarousel items={items} assumedWidth={viewportWidth ?? undefined} />
       </div>
 
       <div className="flex flex-wrap justify-center gap-3 pb-6 pt-1">

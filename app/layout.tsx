@@ -8,6 +8,7 @@ import { CartProvider } from "@/components/CartProvider";
 import { FavoritesProvider } from "@/components/FavoritesProvider";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getCartSummary } from "@/lib/cart-summary";
+import { ViewportWidthCookie } from "@/components/ViewportWidthCookie";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -69,6 +70,7 @@ export default async function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
             <CookieBanner />
+            <ViewportWidthCookie />
           </FavoritesProvider>
         </CartProvider>
       </body>
