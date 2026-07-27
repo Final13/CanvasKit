@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 
 interface SearchResult {
   slug: string;
@@ -22,20 +22,34 @@ export function SearchBar({ autoFocus, onNavigate }: SearchBarProps) {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [total, setTotal] = useState(0);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  // Счётчик запросов: ответ применяем только от последнего — иначе на
+  // медленной сети устаревший ответ перезапишет свежий (и мог переоткрыть
+  // дропдаун уже после очистки поля).
+  const requestId = useRef(0);
 
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) return;
+    if (q.length < 2) {
+      requestId.current++;
+      setLoading(false);
+      return;
+    }
     const timer = setTimeout(async () => {
+      const id = ++requestId.current;
+      setLoading(true);
+      setOpen(true);
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
         const data = await res.json();
+        if (id !== requestId.current) return;
         setResults(data.results ?? []);
         setTotal(data.total ?? 0);
-        setOpen(true);
       } catch {
         // сеть недоступна — просто не показываем подсказки
+      } finally {
+        if (id === requestId.current) setLoading(false);
       }
     }, 300);
     return () => clearTimeout(timer);
@@ -88,44 +102,53 @@ export function SearchBar({ autoFocus, onNavigate }: SearchBarProps) {
         </div>
       </form>
 
-      {open && results.length > 0 && (
+      {open && (loading || results.length > 0) && (
         <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-xl">
-          <ul className="max-h-80 overflow-y-auto py-2">
-            {results.map((r) => (
-              <li key={r.slug}>
-                <button
-                  type="button"
-                  onClick={() => go(`/template/${r.slug}`)}
-                  className="flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left transition hover:bg-zinc-50"
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 px-3 py-4 text-sm text-zinc-500">
+              <Loader2 size={18} className="animate-spin text-fuchsia-400" />
+              Ищем…
+            </div>
+          ) : (
+            <>
+              <ul className="max-h-80 overflow-y-auto py-2">
+                {results.map((r) => (
+                  <li key={r.slug}>
+                    <button
+                      type="button"
+                      onClick={() => go(`/template/${r.slug}`)}
+                      className="flex w-full cursor-pointer items-center gap-3 px-3 py-2 text-left transition hover:bg-zinc-50"
+                    >
+                      {r.preview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={r.preview}
+                          alt=""
+                          className="h-12 w-9 shrink-0 rounded object-cover"
+                        />
+                      ) : (
+                        <span className="h-12 w-9 shrink-0 rounded bg-zinc-100" />
+                      )}
+                      <span className="line-clamp-2 text-sm text-zinc-800">
+                        {r.title}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {total > results.length && (
+                <Link
+                  href={`/search?q=${encodeURIComponent(query.trim())}`}
+                  onClick={() => {
+                    setOpen(false);
+                    onNavigate?.();
+                  }}
+                  className="block border-t border-zinc-100 px-3 py-2.5 text-center text-sm font-medium text-fuchsia-600 transition hover:bg-fuchsia-50"
                 >
-                  {r.preview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={r.preview}
-                      alt=""
-                      className="h-12 w-9 shrink-0 rounded object-cover"
-                    />
-                  ) : (
-                    <span className="h-12 w-9 shrink-0 rounded bg-zinc-100" />
-                  )}
-                  <span className="line-clamp-2 text-sm text-zinc-800">
-                    {r.title}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          {total > results.length && (
-            <Link
-              href={`/search?q=${encodeURIComponent(query.trim())}`}
-              onClick={() => {
-                setOpen(false);
-                onNavigate?.();
-              }}
-              className="block border-t border-zinc-100 px-3 py-2.5 text-center text-sm font-medium text-fuchsia-600 transition hover:bg-fuchsia-50"
-            >
-              Все результаты ({total})
-            </Link>
+                  Все результаты ({total})
+                </Link>
+              )}
+            </>
           )}
         </div>
       )}
