@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Download, Loader2, Pencil } from "lucide-react";
 import { downloadDesignPng, type DesignSource } from "@/lib/download-design";
+import { PreviewSpinner } from "@/components/PreviewSpinner";
 
 export interface PurchasedTemplate {
   id: string;
@@ -80,13 +81,16 @@ export function PurchasedTemplates({ orders }: PurchasedTemplatesProps) {
               >
                 <div className="relative aspect-[148/210] w-full overflow-hidden bg-zinc-100">
                   {item.previewUrl ? (
-                    <Image
-                      src={item.previewUrl}
-                      alt={item.templateTitle}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
+                    <>
+                      <PreviewSpinner />
+                      <Image
+                        src={item.previewUrl}
+                        alt={item.templateTitle}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    </>
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">
                       Нет превью

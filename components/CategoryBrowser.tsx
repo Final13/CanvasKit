@@ -5,6 +5,7 @@ import {
   getCategoryBySlug,
   getDescendantSlugs,
 } from "@/lib/template-helpers";
+import { PreviewSpinner } from "./PreviewSpinner";
 
 interface CategoryBrowserProps {
   catalog: TemplateCatalog;
@@ -41,13 +42,16 @@ export function CategoryBrowser({ catalog, parentSlug }: CategoryBrowserProps) {
             >
               <div className="relative aspect-[148/210] w-full overflow-hidden bg-zinc-100">
                 {preview ? (
-                  <Image
-                    src={preview}
-                    alt={cat.name}
-                    fill
-                    className="object-cover transition group-hover:scale-105"
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  />
+                  <>
+                    <PreviewSpinner />
+                    <Image
+                      src={preview}
+                      alt={cat.name}
+                      fill
+                      className="object-cover transition group-hover:scale-105"
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    />
+                  </>
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">
                     Нет превью

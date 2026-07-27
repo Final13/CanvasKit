@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Heart } from "lucide-react";
 import { useFavorites } from "@/components/FavoritesProvider";
 import { FavoriteToggle } from "@/components/FavoriteToggle";
+import { PreviewSpinner } from "@/components/PreviewSpinner";
 import { DEFAULT_PRICE } from "@/lib/cart";
 
 export function FavoritesList() {
@@ -45,13 +46,16 @@ export function FavoritesList() {
             className="relative aspect-[148/210] w-full overflow-hidden bg-zinc-100"
           >
             {item.preview ? (
-              <Image
-                src={item.preview}
-                alt={item.title}
-                fill
-                className="object-cover transition duration-500 group-hover:scale-105"
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-              />
+              <>
+                <PreviewSpinner />
+                <Image
+                  src={item.preview}
+                  alt={item.title}
+                  fill
+                  className="object-cover transition duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                />
+              </>
             ) : (
               <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">
                 Нет превью

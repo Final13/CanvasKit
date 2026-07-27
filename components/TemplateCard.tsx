@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { TemplateMeta } from "@/lib/templates";
 import { DEFAULT_PRICE } from "@/lib/cart";
 import { FavoriteToggle } from "@/components/FavoriteToggle";
+import { PreviewSpinner } from "@/components/PreviewSpinner";
 
 interface TemplateCardProps {
   template: TemplateMeta;
@@ -23,13 +24,16 @@ export function TemplateCard({ template, price }: TemplateCardProps) {
         className="relative aspect-[148/210] w-full overflow-hidden bg-zinc-100"
       >
         {template.preview ? (
-          <Image
-            src={template.preview}
-            alt={template.title}
-            fill
-            className="object-cover transition duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          />
+          <>
+            <PreviewSpinner />
+            <Image
+              src={template.preview}
+              alt={template.title}
+              fill
+              className="object-cover transition duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          </>
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">
             Нет превью

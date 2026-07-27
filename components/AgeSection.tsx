@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { PreviewSpinner } from "./PreviewSpinner";
 import type { TemplateCatalog } from "@/lib/templates";
 
 const ages = [
@@ -133,13 +134,16 @@ export function AgeSection({ catalog }: AgeSectionProps) {
               {/* Превью шаблона */}
               <div className="relative aspect-[148/210] w-full overflow-hidden bg-zinc-100">
                 {template?.preview ? (
-                  <Image
-                    src={template.preview}
-                    alt={label}
-                    fill
-                    className="object-cover transition duration-500 group-hover:scale-105"
-                    sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 230px"
-                  />
+                  <>
+                    <PreviewSpinner />
+                    <Image
+                      src={template.preview}
+                      alt={label}
+                      fill
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 230px"
+                    />
+                  </>
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-xs text-zinc-400">
                     Нет превью
