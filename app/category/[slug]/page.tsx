@@ -4,7 +4,6 @@ import { loadCatalog } from "@/lib/templates";
 import {
   getCategoryBySlug,
   getChildCategories,
-  getCategoryPath,
   getTemplatesByCategoryWithDescendants,
 } from "@/lib/template-helpers";
 import { Breadcrumbs } from "@/components/Breadcrumbs";

@@ -50,7 +50,7 @@ function Stepper({ active }: { active: 1 | 2 | 3 }) {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, total, ready, clearCart } = useCart();
+  const { items, total, ready } = useCart();
 
   const [user, setUser] = useState<AuthUser | null>(null);
   const [name, setName] = useState("");
