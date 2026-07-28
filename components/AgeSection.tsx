@@ -91,18 +91,21 @@ export function AgeSection({ catalog }: AgeSectionProps) {
   }, [isHovered, ageTemplates.length, scrollBy]);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="flex items-end justify-between border-b border-zinc-200 pb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-900">По возрасту</h2>
-        <Link
-          href="/category/anniversary"
-          className="flex items-center gap-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
-        >
-          Смотреть все
-          <ChevronRight size={16} />
-        </Link>
+    <section className="py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex items-end justify-between border-b border-zinc-200 pb-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-900">По возрасту</h2>
+          <Link
+            href="/category/anniversary"
+            className="flex items-center gap-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+          >
+            Смотреть все
+            <ChevronRight size={16} />
+          </Link>
+        </div>
       </div>
 
+      {/* Слайдер — во всю ширину экрана */}
       <div
         className="relative mt-6 group/slider"
         onMouseEnter={() => setIsHovered(true)}
@@ -122,14 +125,14 @@ export function AgeSection({ catalog }: AgeSectionProps) {
 
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2"
+          className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory scroll-px-4 py-2 px-4"
           style={{ scrollbarWidth: "none" }}
         >
           {ageTemplates.map(({ value, slug, label, template }) => (
             <Link
               key={slug}
               href={`/category/${slug}`}
-              className="flex-shrink-0 snap-start w-[calc((100%_-_16px)/2)] sm:w-[calc((100%_-_32px)/3)] md:w-[calc((100%_-_48px)/4)] lg:w-[calc((100%_-_64px)/5)] group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition hover:shadow-lg"
+              className="flex-shrink-0 snap-start w-[calc((100%_-_16px)/2)] sm:w-[calc((100%_-_32px)/3)] md:w-[calc((100%_-_48px)/4)] lg:w-[calc((100%_-_80px)/6)] group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition hover:shadow-lg"
             >
               {/* Превью шаблона */}
               <div className="relative aspect-[148/210] w-full overflow-hidden bg-zinc-100">
@@ -141,7 +144,7 @@ export function AgeSection({ catalog }: AgeSectionProps) {
                       alt={label}
                       fill
                       className="object-cover transition duration-500 group-hover:scale-105"
-                      sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 230px"
+                      sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, (max-width: 1024px) 22vw, 15vw"
                     />
                   </>
                 ) : (

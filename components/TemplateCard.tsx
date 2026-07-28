@@ -13,7 +13,7 @@ interface TemplateCardProps {
 export function TemplateCard({ template, price }: TemplateCardProps) {
   const displayPrice = price ?? template.price ?? DEFAULT_PRICE;
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition hover:shadow-lg">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm transition hover:shadow-lg">
       <FavoriteToggle
         slug={template.slug}
         title={template.title}

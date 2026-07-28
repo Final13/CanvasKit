@@ -7,12 +7,18 @@ import { TemplateCard } from "./TemplateCard";
 
 interface TemplateSliderProps {
   templates: TemplateMeta[];
+  /**
+   * fullWidth — слайдер во всю ширину экрана (главная): 6 слайдов на
+   * большом экране, паддинг равен гэпу (16px), чтобы соседние слайды
+   * не выглядывали обрезками. Без флага — как раньше, внутри контейнера.
+   */
+  fullWidth?: boolean;
 }
 
 const GAP = 16;
 const AUTOPLAY_INTERVAL = 3000;
 
-export function TemplateSlider({ templates }: TemplateSliderProps) {
+export function TemplateSlider({ templates, fullWidth = false }: TemplateSliderProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -93,13 +99,19 @@ export function TemplateSlider({ templates }: TemplateSliderProps) {
       {/* Контейнер со скроллом */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2"
+        className={`flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 ${
+          fullWidth ? "scroll-px-4 px-4" : ""
+        }`}
         style={{ scrollbarWidth: "none" }}
       >
         {templates.map((t) => (
           <div
             key={t.slug}
-            className="flex-shrink-0 snap-start w-[calc((100%_-_16px)/2)] sm:w-[calc((100%_-_32px)/3)] md:w-[calc((100%_-_48px)/4)] lg:w-[calc((100%_-_64px)/5)]"
+            className={`flex-shrink-0 snap-start ${
+              fullWidth
+                ? "w-[calc((100%_-_16px)/2)] sm:w-[calc((100%_-_32px)/3)] md:w-[calc((100%_-_48px)/4)] lg:w-[calc((100%_-_80px)/6)]"
+                : "w-[calc((100%_-_16px)/2)] sm:w-[calc((100%_-_32px)/3)] md:w-[calc((100%_-_48px)/4)] lg:w-[calc((100%_-_64px)/5)]"
+            }`}
           >
             <TemplateCard template={t} />
           </div>

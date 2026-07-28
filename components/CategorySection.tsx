@@ -57,56 +57,61 @@ export function CategorySection({
   );
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <h2 className="text-center text-2xl font-semibold text-zinc-900 sm:text-3xl">{title}</h2>
-      {subtitle && (
-        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-zinc-500">{subtitle}</p>
-      )}
+    <section className="py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 className="text-center text-2xl font-semibold text-zinc-900 sm:text-3xl">{title}</h2>
+        {subtitle && (
+          <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-zinc-500">{subtitle}</p>
+        )}
 
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        {tabs.map((tab) => {
-          const active = tab.slug === activeTab;
-          return (
-            <button
-              key={tab.slug}
-              type="button"
-              onClick={() => setActiveTab(tab.slug)}
-              className={`rounded-full border px-6 py-2 text-sm font-semibold uppercase tracking-wide transition ${
-                active
-                  ? "border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800"
-                  : "border-fuchsia-200 text-fuchsia-600 hover:bg-fuchsia-50"
-              }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="mt-8">
-        <div className="flex items-end justify-between border-b border-zinc-200 pb-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-900">
-            Популярное
-          </h3>
-          <Link
-            href={seeAllHref ?? `/category/${activeTab}`}
-            className="flex items-center gap-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
-          >
-            Смотреть все
-            <ChevronRight size={16} />
-          </Link>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {tabs.map((tab) => {
+            const active = tab.slug === activeTab;
+            return (
+              <button
+                key={tab.slug}
+                type="button"
+                onClick={() => setActiveTab(tab.slug)}
+                className={`rounded-full border px-6 py-2 text-sm font-semibold uppercase tracking-wide transition ${
+                  active
+                    ? "border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800"
+                    : "border-fuchsia-200 text-fuchsia-600 hover:bg-fuchsia-50"
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
-        {templates.length > 0 ? (
-          <div className="mt-5">
-            <TemplateSlider templates={templates} />
+        <div className="mt-8">
+          <div className="flex items-end justify-between border-b border-zinc-200 pb-3">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-900">
+              Популярное
+            </h3>
+            <Link
+              href={seeAllHref ?? `/category/${activeTab}`}
+              className="flex items-center gap-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+            >
+              Смотреть все
+              <ChevronRight size={16} />
+            </Link>
           </div>
-        ) : (
+        </div>
+      </div>
+
+      {/* Слайдер — во всю ширину экрана, шапка секции остаётся в контейнере */}
+      {templates.length > 0 ? (
+        <div className="mt-5">
+          <TemplateSlider templates={templates} fullWidth />
+        </div>
+      ) : (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="mt-8 text-center text-sm text-zinc-400">
             В этой категории пока нет шаблонов.
           </p>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 }
