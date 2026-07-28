@@ -173,14 +173,6 @@ export default function CheckoutPage() {
                   Уже покупали? Нажмите для входа
                 </Link>
               </p>
-              <p className="mt-1">
-                <button
-                  type="button"
-                  className="text-fuchsia-600 underline underline-offset-2 hover:text-fuchsia-700"
-                >
-                  Есть купон? Нажмите, чтобы ввести код
-                </button>
-              </p>
             </div>
           )}
 

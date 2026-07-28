@@ -173,24 +173,6 @@ export default function CartPage() {
             >
               Оформить заказ
             </Link>
-
-            <div className="mt-6">
-              <div className="flex items-center gap-2 text-sm font-medium text-zinc-700">
-                <span>🏷</span>
-                <span>Купон</span>
-              </div>
-              <input
-                type="text"
-                placeholder="Код купона"
-                className="mt-2 w-full rounded-xl border border-zinc-200 px-4 py-2.5 text-sm outline-none focus:border-fuchsia-400"
-              />
-              <button
-                type="button"
-                className="mt-2 w-full rounded-full border border-zinc-200 bg-white py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
-              >
-                Применить купон
-              </button>
-            </div>
           </div>
         </div>
       </div>
