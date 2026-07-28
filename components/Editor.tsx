@@ -1,12 +1,22 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import {
+  BadgeCheck,
+  PenLine,
+  Zap,
+  Headset,
+  Gift,
+  TriangleAlert,
+} from "lucide-react";
 import { useFabric } from "@/hooks/useFabric";
 import { Toolbar } from "./Toolbar";
 import { EditorTabs, type TabKey } from "./EditorTabs";
-import { TabPanel } from "./TabPanel";
 import { QrModal } from "./QrModal";
+import { ObjectControlsPanel } from "./ObjectControlsPanel";
+import { PAYMENT_METHODS } from "./PaymentMethods";
 import { SaveDesignModal, type SaveTarget } from "./SaveDesignModal";
 import { UnsavedChangesModal } from "./UnsavedChangesModal";
 import type { TemplateData } from "@/lib/templates";
@@ -20,17 +30,39 @@ interface EditorProps {
   isAuthenticated?: boolean;
 }
 
+// дефолты для кнопки «Цифры» (нижняя панель с выбором возраста убрана)
+const DIGIT_AGE = 30;
+const DIGIT_COLOR = "gold";
+
+// фичи под редактором (как на evyt)
+const EDITOR_FEATURES = [
+  { icon: BadgeCheck, label: "Оригинальный дизайн" },
+  { icon: PenLine, label: "Полная персонализация" },
+  { icon: Zap, label: "Моментальное скачивание" },
+  { icon: Headset, label: "Техническая поддержка" },
+];
+
+// Водяной знак поверх канваса редактора (как на evyt): скриншот бесполезен,
+// а оплаченный PNG рендерится отдельно и остаётся чистым.
+// Оверлей HTML-ом — в toDataURL канваса не попадает.
+const WATERMARK_SVG =
+  `<svg xmlns="http://www.w3.org/2000/svg" width="260" height="180">` +
+  `<text x="130" y="95" font-family="Arial, sans-serif" font-size="24" font-weight="600" text-anchor="middle" ` +
+  `transform="rotate(-25 130 90)" fill="rgba(255,255,255,0.35)" stroke="rgba(0,0,0,0.2)" stroke-width="0.6">evspc.com</text></svg>`;
+const WATERMARK_BG = `url("data:image/svg+xml,${encodeURIComponent(WATERMARK_SVG)}")`;
+
 export function Editor({ template, isAuthenticated = false }: EditorProps) {
   const canvasElRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const [qrOpen, setQrOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabKey>("text");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [unsavedModalOpen, setUnsavedModalOpen] = useState(false);
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
+  const [digitColor, setDigitColor] = useState(DIGIT_COLOR);
   const { addItem, updateItem } = useCart();
   const searchParams = useSearchParams();
   // Режим редактирования товара корзины: /template/slug?edit=<cartItemId>.
@@ -70,16 +102,33 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
     getPreviewDataUrl,
     getCanvasJson,
     activeObject,
+    activeObjectTick,
+    selectionRect,
     updateActiveObject,
+    saveHistory,
+    flipActiveObject,
   } = useFabric(canvasElRef, template, editJson ?? draft?.json ?? null);
 
-  const handleAddToCart = () => {
+  // Верхние кнопки (Цифры/Текст/Фото) — добавление блока на канвас.
+  // Хуки добавления сами переносят фокус на новый объект.
+  const handleEditorAction = (tab: TabKey) => {
+    if (tab === "text") {
+      addText();
+    } else if (tab === "digits") {
+      updateDigits(DIGIT_AGE, digitColor);
+    } else if (tab === "photo") {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleAddToCart = async () => {
     const customizationJson = getCanvasJson();
     if (!customizationJson) return;
     addItem({
       templateSlug: slug,
       templateTitle: template.metadata.title,
-      previewUrl: `/templates/${slug}/preview.webp`,
+      // превью — рендер текущего канваса с правками (как на evyt), а не дефолт шаблона
+      previewUrl: (await getPreviewDataUrl(480)) ?? `/templates/${slug}/preview.webp`,
       price: template.metadata.price ?? DEFAULT_PRICE,
       customizationJson,
     });
@@ -89,10 +138,14 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
   };
 
   // Режим edit: сохраняем правки в тот же товар корзины и уходим в корзину
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     const customizationJson = getCanvasJson();
     if (!customizationJson || !editId) return;
-    updateItem(editId, { customizationJson });
+    const preview = await getPreviewDataUrl(480);
+    updateItem(editId, {
+      customizationJson,
+      ...(preview ? { previewUrl: preview } : {}),
+    });
     savedJsonRef.current = customizationJson;
     setHasUnsavedChanges(false);
     router.push("/cart");
@@ -120,7 +173,7 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
       body: JSON.stringify({
         templateSlug: slug,
         name,
-        preview: getPreviewDataUrl() ?? undefined,
+        preview: (await getPreviewDataUrl()) ?? undefined,
         configJson: customizationJson,
         email,
       }),
@@ -248,8 +301,9 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
   }, [deleteSelected, undo, redo]);
 
   return (
-    <div className="flex w-full max-w-sm flex-col items-center sm:max-w-md md:max-w-lg">
-      <div className="w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
+    <>
+      <div className="mx-auto flex w-full max-w-sm flex-col items-center sm:max-w-md md:max-w-lg">
+        <div className="w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
         <Toolbar
           canUndo={canUndo}
           canRedo={canRedo}
@@ -260,7 +314,19 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
           onSave={() => setSaveOpen(true)}
         />
 
-        <EditorTabs active={activeTab} onChange={setActiveTab} />
+        <EditorTabs onAction={handleEditorAction} />
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) addImageFromFile(file);
+            e.target.value = "";
+          }}
+        />
 
         <div className="relative w-full aspect-[148/210] overflow-hidden bg-black">
           {!ready && (
@@ -273,51 +339,108 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
             className="block h-full w-full"
             style={{ touchAction: "none" }}
           />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-[5]"
+            style={{ backgroundImage: WATERMARK_BG }}
+          />
+          <ObjectControlsPanel
+            activeObject={activeObject}
+            tick={activeObjectTick}
+            rect={selectionRect}
+            updateActiveObject={updateActiveObject}
+            saveHistory={saveHistory}
+            flipActiveObject={flipActiveObject}
+            digitColor={digitColor}
+            onDigitColorChange={(color) => {
+              setDigitColor(color);
+              updateDigitColor(DIGIT_AGE, color);
+            }}
+            fonts={template.fonts}
+          />
         </div>
-
-        <TabPanel
-          activeTab={activeTab}
-          onAddText={addText}
-          onAddPhoto={addImageFromFile}
-          onDigitsChange={updateDigits}
-          onDigitColorChange={updateDigitColor}
-          activeObject={activeObject}
-          updateActiveObject={updateActiveObject}
-          fonts={template.fonts}
-        />
+      </div>
       </div>
 
-      <div className="mt-6 w-full max-w-sm sm:max-w-md md:max-w-lg">
-        <div className="rounded-2xl bg-white p-6 shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-zinc-500">Цена за приглашение</p>
-              <p className="text-2xl font-bold text-zinc-900">
-                {formatPrice(template.metadata.price ?? DEFAULT_PRICE)}
-              </p>
+      <section className="mt-10 w-full">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+          {EDITOR_FEATURES.map(({ icon: Icon, label }) => (
+            <div key={label} className="flex items-center gap-2.5 py-1">
+              <Icon size={20} className="shrink-0 text-zinc-700" />
+              <span className="text-xs font-medium text-zinc-800 sm:text-sm">
+                {label}
+              </span>
             </div>
+          ))}
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-[1fr_340px]">
+          <div>
+            <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-900">
+              <Gift size={16} />
+              Что вы получите
+            </h2>
+            <ul className="mt-3 space-y-1.5 text-sm text-zinc-700">
+              <li>Приглашение: А5 (14,8 × 21 см)</li>
+              <li>Формат: электронный (PNG)</li>
+              <li>
+                Конвертация в PDF доступна в личном кабинете после оформления
+                заказа.
+              </li>
+            </ul>
+
+            <h2 className="mt-6 text-sm font-semibold uppercase tracking-wide text-zinc-900">
+              Описание
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-zinc-600">
+              «{template.metadata.title}» — готовый шаблон приглашения, который
+              можно персонализировать онлайн за пару минут. Укажите детали
+              мероприятия, настройте текст и фото в редакторе — готовый файл
+              будет доступен для скачивания сразу после оплаты. Созданное
+              приглашение можно сразу отправить гостям.
+            </p>
+          </div>
+
+          <div className="h-fit rounded-2xl bg-white p-6 shadow-lg">
+            <p className="text-sm text-zinc-500">Цена за приглашение</p>
+            <p className="mt-1 text-3xl font-bold text-zinc-900">
+              {formatPrice(template.metadata.price ?? DEFAULT_PRICE)}
+            </p>
             {editId ? (
               <button
                 onClick={handleSaveEdit}
-                className="cursor-pointer rounded-xl bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-500"
+                className="mt-4 w-full cursor-pointer rounded-xl bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-500"
               >
                 Сохранить
               </button>
             ) : (
               <button
                 onClick={handleAddToCart}
-                className="cursor-pointer rounded-xl bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-500"
+                className="mt-4 w-full cursor-pointer rounded-xl bg-fuchsia-400 px-6 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-500"
               >
                 В корзину
               </button>
             )}
+            <p className="mt-3 flex items-start gap-1.5 text-xs text-zinc-500">
+              <TriangleAlert size={14} className="mt-0.5 shrink-0" />
+              Перед оплатой проверьте и внесите свои данные в приглашение.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 opacity-70">
+              {PAYMENT_METHODS.map((m) => (
+                <Image
+                  key={m.type}
+                  src={m.iconSrc}
+                  alt={m.label}
+                  title={m.label}
+                  width={40}
+                  height={24}
+                  className="h-5 w-auto"
+                />
+              ))}
+            </div>
           </div>
-          <p className="mt-3 text-xs text-zinc-500">
-            Редактировать приглашение и вносить свои данные можно до оформления заказа. После оплаты
-            файлы будут доступны в личном кабинете.
-          </p>
         </div>
-      </div>
+      </section>
 
       <QrModal
         open={qrOpen}
@@ -344,6 +467,6 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
       />
 
       <CartSidebar open={cartOpen} onClose={() => setCartOpen(false)} />
-    </div>
+    </>
   );
 }

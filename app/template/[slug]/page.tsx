@@ -53,16 +53,17 @@ export default async function TemplatePage({ params }: TemplatePageProps) {
     template.metadata.categorySlugs.find((s) => s !== "invitations") ?? "invitations";
 
   // Тематические рекомендации: из той же категории, без текущего шаблона,
-  // отсортированные по популярности
+  // отсортированные по популярности (сетка 3 ряда: 2/3/5/6 колонки)
   const relatedTemplates = getTemplatesByCategoryWithDescendants(catalog, activeCategorySlug)
     .filter((t) => t.slug !== slug && t.preview)
     .sort((a, b) => (b.seedViews ?? 0) - (a.seedViews ?? 0))
-    .slice(0, 12);
+    .slice(0, 18);
 
   const session = await getSession();
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <>
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <TemplateViewTracker slug={slug} />
       <Breadcrumbs
         catalog={catalog}
@@ -73,11 +74,12 @@ export default async function TemplatePage({ params }: TemplatePageProps) {
       <h1 className="mt-4 text-center text-xl font-semibold text-zinc-900 sm:text-2xl">
         {template.metadata.title}
       </h1>
-      <div className="mt-6 flex justify-center">
+      <div className="mt-6">
         <Editor template={template} isAuthenticated={Boolean(session.userId)} />
+      </div>
       </div>
 
       {relatedTemplates.length > 0 && <RelatedTemplates templates={relatedTemplates} />}
-    </div>
+    </>
   );
 }

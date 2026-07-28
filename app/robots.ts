@@ -6,5 +6,8 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       disallow: "/",
     },
+    sitemap: `${
+      (process.env.NEXT_PUBLIC_APP_URL ?? "https://evspace.ru").replace(/\/+$/, "")
+    }/sitemap.xml`,
   };
 }

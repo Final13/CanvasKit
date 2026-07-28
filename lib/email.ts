@@ -101,6 +101,46 @@ export async function sendOrderConfirmationEmail(data: {
   return true;
 }
 
+export interface PurchaseAttachment {
+  filename: string;
+  /** base64-содержимое PNG */
+  contentBase64: string;
+}
+
+/** Письмо после успешной оплаты: PNG купленных дизайнов во вложении. */
+export async function sendPurchaseDeliveredEmail(data: {
+  to: string;
+  name?: string | null;
+  orderId: string;
+  siteUrl: string;
+  attachments: PurchaseAttachment[];
+}) {
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.warn("SMTP is not configured, purchase email not sent");
+    return false;
+  }
+
+  await transporter.sendMail({
+    from: getFrom(),
+    to: data.to,
+    subject: `Заказ №${data.orderId.slice(0, 8)} оплачен — ваши файлы`,
+    html: `<div style="max-width:480px;margin:0 auto;font-family:Arial,sans-serif;color:#333">
+      <p style="font-size:20px;margin:24px 0">Здравствуйте${data.name ? ", " + escapeHtml(data.name) : ""}!</p>
+      <p style="font-size:16px;line-height:1.6;margin:0 0 16px">Заказ <strong>№${escapeHtml(data.orderId.slice(0, 8))}</strong> оплачен. Спасибо за покупку!</p>
+      <p style="font-size:16px;line-height:1.6;margin:0 0 16px">Готовые приглашения — во вложении к этому письму (PNG). Их также можно скачать в любое время в личном кабинете.</p>
+      <a href="${data.siteUrl}/my-account/orders" style="display:inline-block;background:#f0abfc;color:#111;text-decoration:none;padding:14px 32px;border-radius:9999px;font-weight:600">Мои заказы</a>
+    </div>`,
+    attachments: data.attachments.map((a) => ({
+      filename: a.filename,
+      content: Buffer.from(a.contentBase64, "base64"),
+      contentType: "image/png",
+    })),
+  });
+
+  return true;
+}
+
 export async function sendPasswordResetEmail(data: {
   to: string;
   name?: string | null;

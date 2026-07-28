@@ -11,6 +11,7 @@ import {
   type PaymentMethodType,
 } from "@/components/PaymentMethods";
 import { formatPrice } from "@/lib/cart";
+import { renderDesignImage } from "@/lib/download-design";
 import { Circle, CircleCheck } from "lucide-react";
 
 interface AuthUser {
@@ -89,17 +90,39 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((item) => ({
+      // Полноразмерные PNG дизайнов — для письма после оплаты.
+      // Ошибка рендера одного товара не должна ломать оформление заказа.
+      const orderItems = await Promise.all(
+        items.map(async (item) => {
+          let pngData: string | undefined;
+          try {
+            const rendered = await renderDesignImage(
+              {
+                templateSlug: item.templateSlug,
+                configJson: item.customizationJson,
+              },
+              "png"
+            );
+            pngData = rendered.dataUrl;
+          } catch (renderError) {
+            console.error("Не удалось отрендерить PNG для письма:", renderError);
+          }
+          return {
             templateSlug: item.templateSlug,
             templateTitle: item.templateTitle,
             previewUrl: item.previewUrl,
             price: item.price,
             customizationJson: item.customizationJson,
-          })),
+            pngData,
+          };
+        })
+      );
+
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: orderItems,
           customerName: name,
           customerEmail: email,
           paymentMethodType: paymentMethod,

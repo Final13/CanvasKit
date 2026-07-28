@@ -15,6 +15,8 @@ interface OrderItemDto {
   previewUrl?: string;
   price?: number;
   customizationJson?: string;
+  /** Полноразмерный PNG дизайна (data URL), отрендерен на клиенте при оформлении */
+  pngData?: string;
 }
 
 function generatePassword(): string {
@@ -51,6 +53,7 @@ export async function POST(req: NextRequest) {
       preview_url: item.previewUrl ?? null,
       price: formatAmount(item.price ?? DEFAULT_PRICE),
       customization_json: item.customizationJson ?? null,
+      png_data: item.pngData ?? null,
     }));
 
     const total = formatAmount(normalizedItems.reduce((sum, item) => sum + item.price, 0));

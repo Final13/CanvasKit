@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS order_items (
   order_id CHAR(36) NOT NULL,
   template_slug VARCHAR(255) NOT NULL,
   template_title VARCHAR(500),
-  preview_url VARCHAR(500),
+  preview_url MEDIUMTEXT,
+  png_data LONGTEXT,
   price DECIMAL(10,2) NOT NULL,
   customization_json LONGTEXT,
   INDEX idx_order_id (order_id)

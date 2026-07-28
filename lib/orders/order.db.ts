@@ -20,6 +20,8 @@ export interface OrderItem {
   preview_url: string | null;
   price: number;
   customization_json: string | null;
+  /** Полноразмерный PNG дизайна (data URL) — для письма после оплаты. */
+  png_data?: string | null;
 }
 
 export interface CreateOrderInput {
@@ -60,8 +62,8 @@ export async function createOrder(input: CreateOrderInput): Promise<string> {
     for (const item of input.items) {
       const itemId = generateId();
       transaction.query(
-        `INSERT INTO order_items (id, order_id, template_slug, template_title, preview_url, price, customization_json)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO order_items (id, order_id, template_slug, template_title, preview_url, price, customization_json, png_data)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           itemId,
           input.id,
@@ -70,6 +72,7 @@ export async function createOrder(input: CreateOrderInput): Promise<string> {
           item.preview_url ?? null,
           item.price,
           item.customization_json ?? null,
+          item.png_data ?? null,
         ],
       );
     }

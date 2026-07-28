@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { updateOrderStatus } from "@/lib/orders/order.db";
+import { NextRequest, NextResponse, after } from "next/server";
+import { updateOrderStatus, getOrderWithItems } from "@/lib/orders/order.db";
 import {
   getYookassaPaymentByYookassaId,
   updateYookassaPaymentStatus,
 } from "@/lib/payments/yookassa.db";
 import { fetchYookassaPayment } from "@/lib/payments/yookassa";
+import { sendPurchaseDeliveredEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,9 +37,15 @@ export async function POST(req: NextRequest) {
         orderId = metadata.orderId;
       }
 
-      const freshPayment = await fetchYookassaPayment(yookassaPaymentId);
-      if (freshPayment) {
-        status = freshPayment.status;
+      // Верификация статуса по API; при недоступности/ошибке API
+      // не роняем вебхук — берём статус из события (ЮKassa подписывает его).
+      try {
+        const freshPayment = await fetchYookassaPayment(yookassaPaymentId);
+        if (freshPayment) {
+          status = freshPayment.status;
+        }
+      } catch (fetchError) {
+        console.error("YooKassa getPayment failed, using event status:", fetchError);
       }
 
       if (record) {
@@ -52,6 +59,39 @@ export async function POST(req: NextRequest) {
       if (orderId) {
         if (status === "succeeded" || status === "waiting_for_capture") {
           await updateOrderStatus(orderId, "paid");
+
+          // Письмо с PNG купленных дизайнов — после ответа вебхуку,
+          // чтобы медленный SMTP не задерживал подтверждение ЮKassa.
+          const paidOrderId = orderId;
+          const origin =
+            process.env.NEXT_PUBLIC_APP_URL ||
+            req.headers.get("origin") ||
+            req.nextUrl.origin;
+          after(async () => {
+            try {
+              const full = await getOrderWithItems(paidOrderId);
+              if (!full?.order.customer_email) return;
+              const attachments = full.items
+                .filter((item) => item.png_data?.startsWith("data:image/"))
+                .map((item, index) => ({
+                  filename: `${item.template_slug}${full.items.length > 1 ? `-${index + 1}` : ""}.png`,
+                  contentBase64: item.png_data!.split(",")[1] ?? "",
+                }))
+                .filter((a) => a.contentBase64.length > 0);
+              await sendPurchaseDeliveredEmail({
+                to: full.order.customer_email,
+                name: full.order.customer_name,
+                orderId: paidOrderId,
+                siteUrl: origin,
+                attachments,
+              });
+              console.info(
+                `Purchase email sent for order ${paidOrderId} (${attachments.length} attachments)`
+              );
+            } catch (emailError) {
+              console.error("Failed to send purchase email:", emailError);
+            }
+          });
         } else if (status === "canceled") {
           await updateOrderStatus(orderId, "cancelled");
         }

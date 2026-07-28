@@ -49,13 +49,14 @@ export function CategoryGrid({ templates, currentSort }: CategoryGridProps) {
     }
     const qs = params.toString();
     startTransition(() => {
-      router.push(qs ? `${pathname}?${qs}` : pathname);
+      // scroll: false — остаёмся на уровне фильтра, без перекидывания наверх
+      router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     });
   };
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         {/* Хлебные крошки рендерятся сервером, здесь только SortSelect */}
         <div />
         <SortSelect current={currentSort} onSortChange={handleSortChange} />

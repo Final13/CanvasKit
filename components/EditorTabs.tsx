@@ -5,8 +5,8 @@ import { Crown, Type, ImagePlus } from "lucide-react";
 export type TabKey = "digits" | "text" | "photo";
 
 interface EditorTabsProps {
-  active: TabKey;
-  onChange: (tab: TabKey) => void;
+  /** клик по кнопке — добавить соответствующий блок на канвас */
+  onAction: (tab: TabKey) => void;
 }
 
 const tabs: { key: TabKey; label: string; icon: React.ElementType }[] = [
@@ -15,26 +15,19 @@ const tabs: { key: TabKey; label: string; icon: React.ElementType }[] = [
   { key: "photo", label: "Фото", icon: ImagePlus },
 ];
 
-export function EditorTabs({ active, onChange }: EditorTabsProps) {
+export function EditorTabs({ onAction }: EditorTabsProps) {
   return (
     <div className="flex w-full border-b border-zinc-200 bg-white">
-      {tabs.map(({ key, label, icon: Icon }) => {
-        const isActive = active === key;
-        return (
-          <button
-            key={key}
-            onClick={() => onChange(key)}
-            className={`flex flex-1 cursor-pointer items-center justify-center gap-2 py-3 text-sm font-medium transition sm:py-4 ${
-              isActive
-                ? "bg-white text-black"
-                : "bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
-            }`}
-          >
-            <Icon size={18} />
-            <span>{label}</span>
-          </button>
-        );
-      })}
+      {tabs.map(({ key, label, icon: Icon }) => (
+        <button
+          key={key}
+          onClick={() => onAction(key)}
+          className="flex flex-1 cursor-pointer items-center justify-center gap-2 bg-white py-3 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 hover:text-black sm:py-4"
+        >
+          <Icon size={18} />
+          <span>{label}</span>
+        </button>
+      ))}
     </div>
   );
 }
