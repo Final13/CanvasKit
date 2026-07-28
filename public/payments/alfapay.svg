@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 16">
+<rect x="0.5" y="0.5" width="35" height="15" rx="7.5" fill="#EF3124"/>
+<g transform="translate(5.2,3.6) scale(0.0445) translate(-3.4,-4)" fill="#ffffff">
+<path d="M110.7,28.7C106.1,14.9,100.7,4,82.5,4c-18.3,0-24,10.9-28.8,24.7L3.4,171.5h33.3l11.6-34h64.1l10.8,34h35.4L110.7,28.7z M58,108.9l22.8-67.7h0.8l21.5,67.7H58z"/>
+</g>
+<text x="16.0" y="11.0" font-family="Arial, Helvetica, sans-serif" font-size="8" font-weight="bold" fill="#ffffff">Pay</text>
+</svg>

@@ -232,8 +232,10 @@ export default function CheckoutPage() {
                 будете перенаправлены на защищённую страницу оплаты.
               </p>
               <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2" role="radiogroup" aria-label="Способ оплаты">
-                {PAYMENT_METHODS.map(({ label, type, icon: Icon, chipClass }) => {
+                {PAYMENT_METHODS.map(({ label, type, iconSrc, ...rest }) => {
                   const selected = paymentMethod === type;
+                  const imgClass =
+                    "imgClass" in rest ? rest.imgClass : "max-h-14 max-w-[68px]";
                   return (
                     <button
                       key={type}
@@ -247,10 +249,9 @@ export default function CheckoutPage() {
                           : "border-zinc-200 bg-white hover:border-fuchsia-300 hover:bg-fuchsia-50/50"
                       }`}
                     >
-                      <span
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${chipClass}`}
-                      >
-                        <Icon size={22} />
+                      <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-zinc-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={iconSrc} alt="" className={`${imgClass} object-contain`} />
                       </span>
                       <span className="flex-1 text-sm font-semibold text-zinc-900">{label}</span>
                       {selected ? (
