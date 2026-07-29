@@ -524,6 +524,64 @@ export function useFabric(
       canvas.on("text:changed", updateSelectionRect);
       window.addEventListener("resize", updateSelectionRect);
 
+      // Даблклик (и даблтап — на таче нет нативного dblclick) по тексту:
+      // вход в редактирование + выделение слова под курсором.
+      let lastTextTap = { time: 0, x: 0, y: 0, target: null as any };
+      canvas.on("mouse:down", (opt: any) => {
+        const target = opt.target;
+        if (!target || target.type !== "i-text" || !target.editable) {
+          lastTextTap.time = 0;
+          return;
+        }
+        // пропускаем только контролы (scale/rotate и т.п.), не обычный drag
+        if (opt.transform && opt.transform.action !== "drag") return;
+        const now = Date.now();
+        const p = opt.pointer;
+        const isDouble =
+          now - lastTextTap.time < 400 &&
+          lastTextTap.target === target &&
+          Math.abs(p.x - lastTextTap.x) < 30 &&
+          Math.abs(p.y - lastTextTap.y) < 30;
+        lastTextTap = { time: now, x: p.x, y: p.y, target };
+        if (!isDouble) return;
+        // жест поглощён: третий тап не считать даблтапом — строку
+        // выделяет штатный tripleclick fabric
+        lastTextTap.time = 0;
+        // откладываем за fabric-хендлеры mousedown: IText.mouseDownHandler
+        // сбрасывает выделение в позицию курсора сразу после canvas-события
+        setTimeout(() => {
+          if (!target.isEditing) target.enterEditing();
+          target.selectWord(target.getSelectionStartFromPointer(opt.e));
+          canvas.requestRenderAll();
+        }, 0);
+      });
+
+      // Свайп по канвасу на таче: по пустому месту — скролл страницы,
+      // по объекту — его перемещение. Штатный fabric._onTouchStart делает
+      // preventDefault безусловно (глушит скролл страницы везде) —
+      // пересаживаем его на версию, которая глушит скролл только на
+      // интерактивных объектах (драг объекта), иначе тело как в fabric.
+      canvas.allowTouchScrolling = true;
+      canvas.upperCanvasEl.style.touchAction = "manipulation";
+      const fabricTouchStart = canvas._onTouchStart;
+      canvas.upperCanvasEl.removeEventListener("touchstart", fabricTouchStart);
+      canvas._onTouchStart = function (e: TouchEvent) {
+        const t = canvas.findTarget(e);
+        if (t && t.selectable !== false && t.evented !== false) {
+          e.preventDefault();
+        }
+        if (canvas.mainTouchId === null) {
+          canvas.mainTouchId = canvas.getPointerId(e);
+        }
+        canvas.__onMouseDown(e);
+        canvas._resetTransformEventData();
+        fabric.util.addListener(fabric.document, "touchend", canvas._onTouchEnd, { passive: false });
+        fabric.util.addListener(fabric.document, "touchmove", canvas._onMouseMove, { passive: false });
+        // как в fabric: убираем mousedown, чтобы не было двойных срабатываний
+        fabric.util.removeListener(canvas.upperCanvasEl, "mousedown", canvas._onMouseDown);
+      } as any;
+      fabric.util.addListener(canvas.upperCanvasEl, "touchstart", canvas._onTouchStart, { passive: false });
+
       await loadTemplateIntoCanvas(canvas, fabric, template, initialJson);
     })();
 

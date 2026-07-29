@@ -42,3 +42,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Явные баги, найденные в процессе разработки — фиксить сразу**, даже если их не репортили. Не ограничиваться сообщением пользователю.
 - **В финальный отчёт всегда включать репорт по багам:** какие баги были найдены и что конкретно сделано с каждым (фикс + где, либо почему отложен).
 <!-- END:workflow-rules -->
+
+<!-- BEGIN:project-decisions -->
+# Проектные решения (не откатывать без причины)
+
+- **Sitemap — только MetadataRoute** (`app/sitemap.ts`): генерится на лету из `public/templates/index.json`, кеш 1ч (`revalidate = 3600`). НЕ возвращаться к генерации файла в public/ или к cron-роутам — это сознательный выбор (актуальность без обслуживания).
+- **robots.ts**: индексация выключена глобально (`disallow: "/"`) до запуска продажи; sitemap-ссылка уже прописана.
+- **Шрифты редактора** — набор evyt в `public/fonts/` + `lib/editor-fonts.ts`, подключаются лениво через `injectFonts` (dedupe по family, НЕ перезаписывать style целиком — была гонка).
+- **Фон шаблона** всегда залочен: fabric не сериализует selectable/evented → `lockTemplateBackgrounds` после каждого loadFromJSON (по src из template.json).
+- **PNG заказов** хранится в `order_items.png_data` (рендер на клиенте при checkout), превью в `preview_url` (обе MEDIUMTEXT/LONGTEXT). Вебхук шлёт письмо с вложениями при `payment.succeeded`.
+- **Тач-события fabric**: штатный `_onTouchStart` безусловно preventDefault (глушит скролл страницы) — пересажен на версию с preventDefault только на интерактивных объектах (useFabric); dblclick на тачах не существует — выделение слова через свой детектор даблтапа на `mouse:down`.
+<!-- END:project-decisions -->
