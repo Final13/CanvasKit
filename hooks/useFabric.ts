@@ -635,24 +635,41 @@ export function useFabric(
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        const dataUrl = e.target?.result as string;
-        withoutHistory(() => {
-          fabric.Image.fromURL(dataUrl, (img: any) => {
-            img.set({
-              left: canvasSize.width / 2,
-              top: canvasSize.height / 2,
-              originX: "center",
-              originY: "center",
+        const src = e.target?.result as string;
+        const img = new Image();
+        img.onload = () => {
+          // Даунскейлим крупные фото: base64 исходника (3-8МБ с телефона)
+          // раздувает canvas JSON и рвёт квоту localStorage корзины.
+          // 1800px хватает с запасом (канвас 1748px), JPEG 0.85.
+          const MAX_W = 1800;
+          let dataUrl = src;
+          if (img.width > MAX_W) {
+            const h = Math.round((img.height * MAX_W) / img.width);
+            const off = document.createElement("canvas");
+            off.width = MAX_W;
+            off.height = h;
+            off.getContext("2d")!.drawImage(img, 0, 0, MAX_W, h);
+            dataUrl = off.toDataURL("image/jpeg", 0.85);
+          }
+          withoutHistory(() => {
+            fabric.Image.fromURL(dataUrl, (img: any) => {
+              img.set({
+                left: canvasSize.width / 2,
+                top: canvasSize.height / 2,
+                originX: "center",
+                originY: "center",
+              });
+              const maxW = canvasSize.width * 0.7;
+              if (img.width * (img.scaleX || 1) > maxW) {
+                img.scaleToWidth(maxW);
+              }
+              canvas.add(img);
+              canvas.setActiveObject(img);
+              canvas.renderAll();
             });
-            const maxW = canvasSize.width * 0.7;
-            if (img.width * (img.scaleX || 1) > maxW) {
-              img.scaleToWidth(maxW);
-            }
-            canvas.add(img);
-            canvas.setActiveObject(img);
-            canvas.renderAll();
           });
-        });
+        };
+        img.src = src;
       };
       reader.readAsDataURL(file);
     },

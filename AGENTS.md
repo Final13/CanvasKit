@@ -47,7 +47,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # Проектные решения (не откатывать без причины)
 
 - **Sitemap — только MetadataRoute** (`app/sitemap.ts`): генерится на лету из `public/templates/index.json`, кеш 1ч (`revalidate = 3600`). НЕ возвращаться к генерации файла в public/ или к cron-роутам — это сознательный выбор (актуальность без обслуживания).
-- **robots.ts**: индексация выключена глобально (`disallow: "/"`) до запуска продажи; sitemap-ссылка уже прописана.
+- **robots**: статичный `public/robots.txt` (полная копия evyt.ru/robots.txt, Host/Sitemap наши) — индексация ВКЛЮЧЕНА. Не возвращать app/robots.ts (конфликт со статикой).
 - **Шрифты редактора** — набор evyt в `public/fonts/` + `lib/editor-fonts.ts`, подключаются лениво через `injectFonts` (dedupe по family, НЕ перезаписывать style целиком — была гонка).
 - **Фон шаблона** всегда залочен: fabric не сериализует selectable/evented → `lockTemplateBackgrounds` после каждого loadFromJSON (по src из template.json).
 - **PNG заказов** хранится в `order_items.png_data` (рендер на клиенте при checkout), превью в `preview_url` (обе MEDIUMTEXT/LONGTEXT). Вебхук шлёт письмо с вложениями при `payment.succeeded`.

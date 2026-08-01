@@ -16,7 +16,6 @@ const STATIC_PAGES: {
   priority: number;
 }[] = [
   { path: "/", changeFrequency: "weekly", priority: 1.0 },
-  { path: "/search", changeFrequency: "monthly", priority: 0.4 },
   { path: "/contacts", changeFrequency: "monthly", priority: 0.3 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.2 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.2 },

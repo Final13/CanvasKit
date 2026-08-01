@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Menu,
   X,
@@ -185,6 +185,12 @@ export function Header({
   const { count, total, ready } = useCart();
   const { count: favoritesCount } = useFavorites();
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Сайдбар корзины не переживает переходы: закрываем при смене роута
+  useEffect(() => {
+    setCartOpen(false);
+  }, [pathname]);
 
   // Статус авторизации приходит с сервера (initialUser); синхронизируемся,
   // когда layout перерендерился после login/logout (router.refresh()).

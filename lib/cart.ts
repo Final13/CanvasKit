@@ -46,7 +46,12 @@ export function writeCartSummaryCookie(items: CartItem[]) {
 
 export function saveCartToStorage(items: CartItem[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem("canvaskit-cart", JSON.stringify(items));
+  try {
+    localStorage.setItem("canvaskit-cart", JSON.stringify(items));
+  } catch (err) {
+    // квота localStorage (~5МБ): корзина с тяжёлыми превью/фото
+    console.warn("Не удалось сохранить корзину в localStorage (квота):", err);
+  }
   writeCartSummaryCookie(items);
 }
 
