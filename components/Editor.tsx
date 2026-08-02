@@ -8,7 +8,6 @@ import {
   PenLine,
   Zap,
   Headset,
-  Gift,
   TriangleAlert,
 } from "lucide-react";
 import { useFabric } from "@/hooks/useFabric";
@@ -17,6 +16,7 @@ import { EditorTabs, type TabKey } from "./EditorTabs";
 import { QrModal } from "./QrModal";
 import { ObjectControlsPanel } from "./ObjectControlsPanel";
 import { PAYMENT_METHODS } from "./PaymentMethods";
+import { TemplateInfoTabs } from "./TemplateInfoTabs";
 import { SaveDesignModal, type SaveTarget } from "./SaveDesignModal";
 import { UnsavedChangesModal } from "./UnsavedChangesModal";
 import type { TemplateData } from "@/lib/templates";
@@ -374,32 +374,8 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
           ))}
         </div>
 
-        <div className="mt-6 grid gap-6 md:grid-cols-[1fr_340px]">
-          <div>
-            <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-zinc-900">
-              <Gift size={16} />
-              Что вы получите
-            </h2>
-            <ul className="mt-3 space-y-1.5 text-sm text-zinc-700">
-              <li>Приглашение: А5 (14,8 × 21 см)</li>
-              <li>Формат: электронный (PNG)</li>
-              <li>
-                Конвертация в PDF доступна в личном кабинете после оформления
-                заказа.
-              </li>
-            </ul>
-
-            <h2 className="mt-6 text-sm font-semibold uppercase tracking-wide text-zinc-900">
-              Описание
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-              «{template.metadata.title}» — готовый шаблон приглашения, который
-              можно персонализировать онлайн за пару минут. Укажите детали
-              мероприятия, настройте текст и фото в редакторе — готовый файл
-              будет доступен для скачивания сразу после оплаты. Созданное
-              приглашение можно сразу отправить гостям.
-            </p>
-          </div>
+        <div className="mt-10 grid gap-6 md:grid-cols-[1fr_340px]">
+          <TemplateInfoTabs title={template.metadata.title} />
 
           <div className="h-fit rounded-2xl bg-white p-6 shadow-lg">
             <p className="text-sm text-zinc-500">Цена за приглашение</p>
