@@ -24,6 +24,7 @@ import { useCart } from "@/components/CartProvider";
 import { CartSidebar } from "@/components/CartSidebar";
 import { DEFAULT_PRICE, formatPrice, getCartFromStorage } from "@/lib/cart";
 import { getDesignDraft, saveDesignDraft, clearDesignDraft } from "@/lib/design-draft";
+import { reachGoal } from "@/lib/metrika";
 
 interface EditorProps {
   template: TemplateData;
@@ -132,6 +133,7 @@ export function Editor({ template, isAuthenticated = false }: EditorProps) {
       price: template.metadata.price ?? DEFAULT_PRICE,
       customizationJson,
     });
+    reachGoal("add_cart");
     setCartOpen(true);
     savedJsonRef.current = customizationJson;
     setHasUnsavedChanges(false);

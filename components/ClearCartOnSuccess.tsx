@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useCart } from "@/components/CartProvider";
+import { reachGoal } from "@/lib/metrika";
 
 /** Очищает корзину при монтировании — вызывается на странице успешной оплаты. */
 export function ClearCartOnSuccess() {
@@ -9,6 +10,7 @@ export function ClearCartOnSuccess() {
 
   useEffect(() => {
     clearCart();
+    reachGoal("success_pay");
   }, [clearCart]);
 
   return null;

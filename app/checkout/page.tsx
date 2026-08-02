@@ -12,6 +12,7 @@ import {
 } from "@/components/PaymentMethods";
 import { formatPrice } from "@/lib/cart";
 import { renderDesignImage } from "@/lib/download-design";
+import { reachGoal } from "@/lib/metrika";
 import { Circle, CircleCheck } from "lucide-react";
 
 interface AuthUser {
@@ -85,6 +86,9 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canCheckout) return;
+
+    // Цель Метрики «Нажал на оплату»
+    reachGoal("push_pay");
 
     setLoading(true);
     setError(null);

@@ -6,6 +6,7 @@ import { Download, ShoppingCart } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
 import { DEFAULT_PRICE } from "@/lib/cart";
 import { downloadDesignPng } from "@/lib/download-design";
+import { reachGoal } from "@/lib/metrika";
 
 export interface SavedDesignItem {
   id: string;
@@ -71,6 +72,7 @@ export function SavedDesigns({ designs, purchasedSlugs }: SavedDesignsProps) {
       price: DEFAULT_PRICE,
       customizationJson: design.configJson ?? "",
     });
+    reachGoal("add_cart");
     router.push("/cart");
   };
 

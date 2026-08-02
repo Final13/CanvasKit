@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect } from "react";
 import { X, ShoppingBag } from "lucide-react";
 import { useCart } from "@/components/CartProvider";
 import { formatPrice } from "@/lib/cart";
+import { reachGoal } from "@/lib/metrika";
 
 function Stepper({ active }: { active: 1 | 2 | 3 }) {
   const steps = [
@@ -42,6 +44,11 @@ function Stepper({ active }: { active: 1 | 2 | 3 }) {
 
 export default function CartPage() {
   const { items, removeItem, total, ready } = useCart();
+
+  // Цель Метрики «Перешел в корзину»
+  useEffect(() => {
+    reachGoal("redirect_to_cart");
+  }, []);
 
   if (!ready) {
     return (

@@ -52,4 +52,5 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Фон шаблона** всегда залочен: fabric не сериализует selectable/evented → `lockTemplateBackgrounds` после каждого loadFromJSON (по src из template.json).
 - **PNG заказов** хранится в `order_items.png_data` (рендер на клиенте при checkout), превью в `preview_url` (обе MEDIUMTEXT/LONGTEXT). Вебхук шлёт письмо с вложениями при `payment.succeeded`.
 - **Тач-события fabric**: штатный `_onTouchStart` безусловно preventDefault (глушит скролл страницы) — пересажен на версию с preventDefault только на интерактивных объектах (useFabric); dblclick на тачах не существует — выделение слова через свой детектор даблтапа на `mouse:down`.
+- **Цели Яндекс.Метрики** (счётчик 110908888 в Footer, lazyOnload): отправка только через `reachGoal()` из `lib/metrika.ts` — он создаёт стаб-очередь `ym.a`, т.к. tag.js грузится лениво и ранние события (mount на /cart, /checkout/success) иначе теряются. НЕ заменять на наивный `if (window.ym)`. Цели: add_cart (Editor + SavedDesigns), redirect_to_cart (/cart mount), push_pay (checkout submit), success_pay (ClearCartOnSuccess).
 <!-- END:project-decisions -->
