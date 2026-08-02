@@ -220,7 +220,7 @@ export function Header({
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-zinc-100 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-4 sm:gap-6 sm:px-6 lg:px-8">
           <Link href="/" className="flex shrink-0 items-center gap-1.5">
             <LogoSticker />
             <Image
@@ -232,7 +232,7 @@ export function Header({
             />
           </Link>
 
-          <nav className="hidden items-center gap-5 lg:flex">
+          <nav className="hidden items-center gap-5 min-[1200px]:flex">
             <Dropdown
               open={openDropdown === "birthday"}
               onHover={(v) => setOpenDropdown(v ? "birthday" : null)}
@@ -311,7 +311,7 @@ export function Header({
             </button>
           </nav>
 
-          <div className="ml-auto hidden items-center gap-5 lg:flex">
+          <div className="ml-auto hidden items-center gap-5 min-[1200px]:flex">
             <Link
               href="/my-account"
               className="flex items-center gap-1.5 border-b-2 border-lime-400 px-1 pb-1 pt-1.5 text-[13px] font-semibold uppercase tracking-wider text-zinc-800 transition hover:text-zinc-950"
@@ -346,14 +346,56 @@ export function Header({
             </button>
           </div>
 
-          <button
-            type="button"
-            className="ml-auto flex h-10 w-10 items-center justify-center rounded-xl text-zinc-600 lg:hidden"
-            onClick={() => setOpenMobile(!openMobile)}
-            aria-label="Меню"
-          >
-            {openMobile ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="ml-auto flex items-center gap-0.5 min-[1200px]:hidden">
+            <Link
+              href="/my-account"
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-600 transition hover:text-zinc-900 sm:h-10 sm:w-10"
+              aria-label="Аккаунт"
+            >
+              <User size={22} />
+            </Link>
+            <button
+              type="button"
+              onClick={() => setCartOpen(true)}
+              className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-600 transition hover:text-zinc-900 sm:h-10 sm:w-10"
+              aria-label="Корзина"
+            >
+              <ShoppingCart size={22} />
+              {displayCount > 0 && (
+                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-fuchsia-400 px-1 text-[10px] font-bold text-white">
+                  {displayCount}
+                </span>
+              )}
+            </button>
+            <Link
+              href="/favorites"
+              className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-600 transition hover:text-zinc-900 sm:h-10 sm:w-10"
+              aria-label="Избранное"
+            >
+              <Heart size={22} fill={favoritesCount > 0 ? "currentColor" : "none"} />
+              {favoritesCount > 0 && (
+                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-fuchsia-400 px-1 text-[10px] font-bold text-white">
+                  {favoritesCount}
+                </span>
+              )}
+            </Link>
+            <button
+              type="button"
+              onClick={() => setSearchOpen((v) => !v)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-600 transition hover:text-zinc-900 sm:h-10 sm:w-10"
+              aria-label="Поиск"
+            >
+              <Search size={22} />
+            </button>
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-600 sm:h-10 sm:w-10"
+              onClick={() => setOpenMobile(!openMobile)}
+              aria-label="Меню"
+            >
+              {openMobile ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
         {searchOpen && (
@@ -365,49 +407,7 @@ export function Header({
         )}
 
         {openMobile && (
-          <div className="border-t border-zinc-100 bg-white px-4 py-4 lg:hidden">
-            <div className="mb-4">
-              <SearchBar onNavigate={() => setOpenMobile(false)} />
-            </div>
-            <div className="mb-4 flex items-center justify-between">
-              <Link
-                href="/favorites"
-                className="flex items-center gap-2 text-sm font-medium text-zinc-700"
-                onClick={() => setOpenMobile(false)}
-              >
-                <Heart size={18} />
-                Избранное{favoritesCount > 0 ? ` (${favoritesCount})` : ""}
-              </Link>
-            </div>
-            <div className="mb-4 flex items-center justify-between">
-              {user ? (
-                <Link
-                  href="/my-account"
-                  className="flex items-center gap-2 text-sm font-medium text-zinc-700"
-                  onClick={() => setOpenMobile(false)}
-                >
-                  <User size={18} />
-                  {user.name || user.email}
-                </Link>
-              ) : (
-                <Link
-                  href="/my-account"
-                  className="flex items-center gap-2 text-sm font-medium text-zinc-700"
-                  onClick={() => setOpenMobile(false)}
-                >
-                  <User size={18} />
-                  Вход
-                </Link>
-              )}
-              <button
-                onClick={() => setCartOpen(true)}
-                className="flex items-center gap-2 rounded-lg bg-lime-300 px-3 py-1.5 text-sm font-bold text-zinc-900"
-              >
-                <ShoppingCart size={16} />
-                {formatPrice(displayTotal)}
-              </button>
-            </div>
-
+          <div className="border-t border-zinc-100 bg-white px-4 py-4 min-[1200px]:hidden">
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 День рождения
