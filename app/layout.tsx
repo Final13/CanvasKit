@@ -26,9 +26,11 @@ const marckScript = Marck_Script({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://evspc.com"),
   title: "Event Space — конструктор приглашений",
   description:
     "Создавайте и скачивайте персонализированные приглашения на праздники, дни рождения и юбилеи за пару минут",
+  // Сайт пока закрыт от индексации целиком — снять при запуске
   robots: {
     index: false,
     follow: false,

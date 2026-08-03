@@ -38,6 +38,8 @@ export async function generateMetadata({ params }: TemplatePageProps): Promise<M
   return {
     title: `${template.metadata.title} — Event Space`,
     description: `Редактор приглашения «${template.metadata.title}». Настройте текст, фото и QR-код, скачайте готовый файл после оплаты.`,
+    // GET-параметры (?edit=...) закрыты в robots.txt — канонический URL чистый
+    alternates: { canonical: `/template/${slug}` },
   };
 }
 

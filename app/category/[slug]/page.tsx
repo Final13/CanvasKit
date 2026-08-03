@@ -65,6 +65,8 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   return {
     title: `${category.name} — Event Space`,
     description: `Шаблоны приглашений в категории «${category.name}». Выберите дизайн и персонализируйте текст и фото онлайн.`,
+    // GET-параметры (?sort=...) закрыты в robots.txt — канонический URL чистый
+    alternates: { canonical: `/category/${slug}` },
   };
 }
 
