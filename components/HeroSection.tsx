@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { preload } from "react-dom";
 import { ArrowRight } from "lucide-react";
 import { HeroCarousel, type HeroCarouselItem } from "./HeroCarousel";
 import { getViewportWidth } from "@/lib/viewport";
@@ -12,6 +13,9 @@ export async function HeroSection({ items }: HeroSectionProps) {
   // Ширина экрана из прошлого визита — SSR-перспектива карусели под неё,
   // после гидрации слайды не дёргаются.
   const viewportWidth = await getViewportWidth();
+  // Фон hero — LCP-элемент страницы (CSS background): preload scanner его не
+  // видит, без подсказки запрос стартует поздно и с обычным приоритетом.
+  preload("/images/hero/hero-bg.webp", { as: "image", fetchPriority: "high" });
   return (
     <section
       className="relative w-full overflow-hidden"
